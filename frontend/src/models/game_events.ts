@@ -1,5 +1,5 @@
 import { Card } from "./card";
-import { Player } from "./player";
+import { Player, SelfPlayer } from "./player";
 
 export type GameEventType = "game start" | "game update";
 
@@ -9,7 +9,8 @@ export interface GameEvent {
 }
 
 export interface GameStartEvent extends GameEvent {
-	players: Player[];
+	player: SelfPlayer;
+	otherPlayers: Player[];
 	initialFieldCards: Card[]; // length === 4
 }
 

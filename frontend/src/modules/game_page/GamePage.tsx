@@ -1,6 +1,6 @@
 import { randomCard } from "@models/card";
 import { GameStartEvent } from "@models/game_events";
-import { randomPlayer } from "@models/player";
+import { randomPlayer, randomSelfPlayer } from "@models/player";
 import { EventsContext, SocketContext } from "@utils/context";
 import { generateUid } from "@utils/utils";
 import { useContext, useEffect } from "react";
@@ -17,7 +17,8 @@ function GamePage() {
 		const mockedGameStartEvent: GameStartEvent = {
 			type: "game start",
 			id: generateUid(),
-			players: [...Array.from(Array(4).keys()).map((i) => randomPlayer(i + 1))], // 4 random players
+			player: randomSelfPlayer(),
+			otherPlayers: [...Array.from(Array(4).keys()).map((i) => randomPlayer(i + 1))], // 4 random other players
 			initialFieldCards: [...Array.from(Array(4).keys()).map(() => randomCard())], // 4 random initial field cards
 		};
 		onGameEvent(mockedGameStartEvent);
@@ -28,14 +29,14 @@ function GamePage() {
 			<h1 className='text-4xl'>GAME</h1>
 			{/* <p>{connecting && <span>Connecting...</span>}</p> */}
 			{game && (
-				<section>
-					<div>
-						{game.players.map((player) => (
+				<main>
+					<section className='mt-12'>
+						{game.otherPlayers.map((player) => (
 							<p key={player.name}>{player.name}</p>
 						))}
-					</div>
+					</section>
 
-					<div>
+					<section className='mt-12'>
 						{game.fieldCards.map((row) => (
 							<div>
 								{row.map((card) => (
@@ -43,8 +44,18 @@ function GamePage() {
 								))}
 							</div>
 						))}
-					</div>
-				</section>
+					</section>
+
+					<section className='mt-12'>
+						<p>{game.player.name}</p>
+
+						<div className='flex'>
+							{game.player.cards.map((card) => (
+								<div className='mr-2'>{card.number}</div>
+							))}
+						</div>
+					</section>
+				</main>
 			)}
 		</div>
 	);

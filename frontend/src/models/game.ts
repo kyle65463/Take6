@@ -1,7 +1,8 @@
 import { Card } from "./card";
-import { Player } from "./player";
+import { Player, SelfPlayer } from "./player";
 
 export interface Game {
-	players: Player[];
+	player: SelfPlayer;
+	otherPlayers: Player[];
 	fieldCards: Card[][];
 }

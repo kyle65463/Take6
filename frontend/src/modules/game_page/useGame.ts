@@ -15,11 +15,12 @@ export function useGame() {
 			// Handle the game event
 			switch (gameEvent.type) {
 				case "game start":
-					const { players, initialFieldCards: initialCards } = gameEvent as GameStartEvent;
-					if (initialCards.length !== 4) throw "initialCards.length must be 4";
+					const { player, otherPlayers, initialFieldCards } = gameEvent as GameStartEvent;
+					if (initialFieldCards.length !== 4) throw "initialFieldCards.length must be 4";
 					const newGame = {
-						players,
-						fieldCards: [...initialCards.map((card) => [card])],
+						player,
+						otherPlayers,
+						fieldCards: [...initialFieldCards.map((card) => [card])],
 					};
 					setGame(newGame);
 				case "game update":
