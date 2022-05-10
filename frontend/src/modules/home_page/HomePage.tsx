@@ -8,10 +8,15 @@ function HomePage() {
 
 	return (
 		<div className='layout'>
-			<p className='text-4xl'>HOME</p>
-			<Link href='/play'>
-				<Button onClick={connectServer}>Play</Button>
-			</Link>
+			<h1 className='text-4xl'>HOME</h1>
+
+			<div>
+				<Link href='/play'>
+					<Button style='primary' onClick={connectServer}>
+						Play
+					</Button>
+				</Link>
+			</div>
 		</div>
 	);
 }

@@ -12,7 +12,7 @@ function GamePage() {
 
 	return (
 		<div className='layout'>
-			<p className='text-4xl'>GAME</p>
+			<h1 className='text-4xl'>GAME</h1>
 			<p>{connecting && <span>Connecting...</span>}</p>
 		</div>
 	);
