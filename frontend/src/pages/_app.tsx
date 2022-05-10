@@ -36,6 +36,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 	// e.g. the player played a card
 	const sendPlayerEvent = useCallback(
 		(playerEvent: PlayerEvent) => {
+			// TODO: send the event to the server
 			if (socket) {
 				// socket.emit()
 			}
