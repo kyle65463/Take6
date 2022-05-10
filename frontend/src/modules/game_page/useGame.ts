@@ -4,7 +4,7 @@ import { EventsContext } from "@utils/context";
 import { useCallback, useContext, useEffect, useState } from "react";
 
 export function useGame() {
-	const [game, setGame] = useState<Game | undefined>();
+	const [game, setGame] = useState<Game>();
 	const [selectedHandCardId, setSelctedHandCardId] = useState<number | undefined>();
 	const { gameEvents } = useContext(EventsContext);
 

@@ -30,25 +30,26 @@ function GamePage() {
 			<h1 className='text-4xl'>GAME</h1>
 			{/* <p>{connecting && <span>Connecting...</span>}</p> */}
 			{game && (
-				<main>
-					<section className='mt-12'>
-						{game.otherPlayers.map((player) => (
-							<p key={player.name}>{player.name}</p>
-						))}
-					</section>
+				<main className='flex-1 flex flex-col justify-between mb-24'>
+					<div className='flex justify-between'>
+						<section className='mt-12'>
+							{game.fieldCards.map((row) => (
+								<div>
+									{row.map((card) => (
+										<div className='mr-4'>{card.number}</div>
+									))}
+								</div>
+							))}
+						</section>
+						<section className='mt-12'>
+							{game.otherPlayers.map((player) => (
+								<p key={player.name}>{player.name}</p>
+							))}
+						</section>
+					</div>
 
 					<section className='mt-12'>
-						{game.fieldCards.map((row) => (
-							<div>
-								{row.map((card) => (
-									<div className='mr-4'>{card.number}</div>
-								))}
-							</div>
-						))}
-					</section>
-
-					<section className='mt-12'>
-						<p>{game.player.name}</p>
+						<p className='text-xl mb-6 mx-12 font-bold'>{game.player.name}</p>
 
 						<div className='flex justify-center'>
 							{game.player.cards.map((card, i) => (
