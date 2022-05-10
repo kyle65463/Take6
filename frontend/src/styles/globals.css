@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.layout {
+	@apply flex flex-col;
+	max-width: 87.5rem;
+	width: 90%;
+	margin: 2rem auto;
+	min-height: calc(100vh - 4rem);
+}

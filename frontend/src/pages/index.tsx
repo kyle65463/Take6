@@ -1,15 +1,7 @@
-import Head from "next/head";
+import HomePage from "@modules/home_page/HomePage";
 
-function Home() {
-	return (
-		<div>
-			<Head>
-				<title>Take6</title>
-				<link rel='icon' href='/favicon.ico' />
-			</Head>
-			<p className='text-4xl'>Hello world</p>
-		</div>
-	);
+function index() {
+	return <HomePage />;
 }
 
-export default Home;
+export default index;
