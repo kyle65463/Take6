@@ -7,7 +7,7 @@ function Home() {
 				<title>Take6</title>
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
-			Hello world
+			<p className='text-4xl'>Hello world</p>
 		</div>
 	);
 }
