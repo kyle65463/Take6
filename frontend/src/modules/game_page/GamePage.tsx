@@ -1,3 +1,4 @@
+import HandCard from "@common/components/HandCard";
 import { randomCard } from "@models/card";
 import { GameStartEvent } from "@models/game_events";
 import { randomPlayer, randomSelfPlayer } from "@models/player";
@@ -7,7 +8,7 @@ import { useContext, useEffect } from "react";
 import { useGame } from "./useGame";
 
 function GamePage() {
-	const { game } = useGame();
+	const { game, selectedHandCardId, selectHandCard } = useGame();
 	const { socket } = useContext(SocketContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const connecting = socket === undefined;
@@ -49,9 +50,13 @@ function GamePage() {
 					<section className='mt-12'>
 						<p>{game.player.name}</p>
 
-						<div className='flex'>
-							{game.player.cards.map((card) => (
-								<div className='mr-2'>{card.number}</div>
+						<div className='flex justify-center'>
+							{game.player.cards.map((card, i) => (
+								<HandCard
+									onClick={() => selectHandCard(i)}
+									card={card}
+									selected={i === selectedHandCardId}
+								/>
 							))}
 						</div>
 					</section>

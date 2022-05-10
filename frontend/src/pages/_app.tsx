@@ -51,7 +51,9 @@ function MyApp({ Component, pageProps }: AppProps) {
 					<title>Take6</title>
 					<link rel='icon' href='/favicon.ico' />
 				</Head>
-				<Component {...pageProps} />
+				<div className='bg-base-200 min-h-screen'>
+					<Component {...pageProps} />
+				</div>
 			</EventsContext.Provider>
 		</SocketContext.Provider>
 	);

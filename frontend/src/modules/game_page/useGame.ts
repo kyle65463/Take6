@@ -1,10 +1,11 @@
 import { Game } from "@models/game";
 import { GameStartEvent } from "@models/game_events";
 import { EventsContext } from "@utils/context";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 export function useGame() {
 	const [game, setGame] = useState<Game | undefined>();
+	const [selectedHandCardId, setSelctedHandCardId] = useState<number | undefined>();
 	const { gameEvents } = useContext(EventsContext);
 
 	// Listen for every game events
@@ -29,5 +30,17 @@ export function useGame() {
 		}
 	}, [gameEvents]);
 
-	return { game };
+	const selectHandCard = useCallback(
+		(id: number) => {
+			if (id === selectedHandCardId) {
+				// Unselect it
+				setSelctedHandCardId(undefined);
+			} else {
+				setSelctedHandCardId(id);
+			}
+		},
+		[selectedHandCardId]
+	);
+
+	return { game, selectedHandCardId, selectHandCard };
 }
