@@ -1,11 +1,12 @@
 import Button from "@common/components/Button";
-import DisplayCard from "@common/components/DisplayCard";
 import { randomCard } from "@models/card";
 import { GameStartEvent } from "@models/game_events";
 import { randomPlayer, randomSelfPlayer } from "@models/player";
+import DisplayCard from "@modules/game_page/DisplayCard";
 import { EventsContext, SocketContext } from "@utils/context";
 import { generateUid } from "@utils/utils";
 import { useContext, useEffect } from "react";
+import PlayerCard from "./PlayerCard";
 import { useGame } from "./useGame";
 
 function GamePage() {
@@ -75,7 +76,7 @@ function GamePage() {
 							{/* Players info */}
 							<section>
 								{game.otherPlayers.map((player) => (
-									<p key={player.name}>{player.name}</p>
+									<PlayerCard player={player} />
 								))}
 							</section>
 						</div>
@@ -83,7 +84,10 @@ function GamePage() {
 
 					<section className='mt-12'>
 						<div className='px-16 w-full flex justify-between items-end mb-4'>
-							<p className='text-xl font-bold'>{game.player.name}</p>
+							<p>
+								<span className='text-xl font-bold mr-4'>{game.player.name}</span>
+								<span className='text-gray-600'>Score: {game.player.score}</span>
+							</p>
 							{selectedHandCardId !== undefined ? (
 								<Button style='primary' onClick={() => playCard(selectedHandCardId)}>
 									Confirm
