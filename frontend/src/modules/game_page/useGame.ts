@@ -4,10 +4,12 @@ import {
 	AllPlayerPlayedEvent,
 	AppendRowEvent,
 	ClearRowEvent,
+	GameOverEvent,
 	GameStartEvent,
 	StartCardSelectionEvent,
 	StartRowSelectionEvent,
 } from "@models/game_events";
+import { Player, randomPlayer, randomSelfPlayer, SelfPlayer } from "@models/player";
 import { PlayCardEvent, SelectRowEvent } from "@models/player_events";
 import { EventsContext } from "@utils/context";
 import { deepCopy, generateUid, getRandomInt } from "@utils/utils";
@@ -18,9 +20,11 @@ export function useGame() {
 	const [selectedHandCardId, setSelctedHandCardId] = useState<number | undefined>();
 	const [inRowSelectionMode, setInRowSelectionMode] = useState(false);
 	const [inCardSelectionMode, setInCardSelectionMode] = useState(false);
+	const [winners, setWinners] = useState<(Player | SelfPlayer)[]>();
 	const { gameEvents, sendPlayerEvent, clearGameEvents } = useContext(EventsContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const [cnt, setCnt] = useState(0); // ! Used for mocked server
+	const interval = 350; // ! Used for mocked server
 
 	const onGameStart = useCallback((gameStartEvent: GameStartEvent) => {
 		const { player, otherPlayers, initialFieldCards } = gameStartEvent;
@@ -35,18 +39,34 @@ export function useGame() {
 		setInCardSelectionMode(true);
 	}, []);
 
+	const onGameOver = useCallback((gameOverEvent: GameOverEvent) => {
+		const { winners } = gameOverEvent;
+		setWinners(winners);
+	}, []);
+
 	const onAppendRow = useCallback((appendRowEvent: AppendRowEvent) => {
-		const { card, rowIdx } = appendRowEvent;
+		const { playerName, card, rowIdx } = appendRowEvent;
 		setGame((oldGame) => {
 			if (oldGame) {
 				const newGame: Game = deepCopy(oldGame);
-				const fieldCards = newGame.fieldCards;
+				const { fieldCards, otherPlayers } = newGame;
 				if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
 
-				if (rowIdx >= 6) {
-					// The row is full, clear it
+				// Check if the row is full
+				if (fieldCards[rowIdx].length >= 5) {
+					// The row is full, update player's score
+					const score = fieldCards[rowIdx].reduce((prev, cur) => prev + cur.score, 0);
+					const player = otherPlayers.find((player) => player.name === playerName);
+					if (player) {
+						player.score += score;
+					} else {
+						if (newGame.player.name === playerName) {
+							newGame.player.score += score;
+						} else throw "Player not found";
+					}
+
+					// Clear the row
 					fieldCards[rowIdx] = [];
-					// TODO: add score to the player
 				}
 
 				// Add the card to the target row
@@ -61,21 +81,32 @@ export function useGame() {
 		// ! Used for mocked server
 		setTimeout(() => {
 			setCnt((cnt) => cnt + 1);
-		}, 1350);
+		}, interval);
 	}, []);
 
 	const onClearRow = useCallback((clearRowEvent: ClearRowEvent) => {
-		const { card, rowIdx } = clearRowEvent;
+		const { playerName, card, rowIdx } = clearRowEvent;
 		setGame((oldGame) => {
 			if (oldGame) {
 				const newGame: Game = deepCopy(oldGame);
-				const fieldCards = newGame.fieldCards;
+				const { fieldCards, otherPlayers } = newGame;
 				if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
+
+				// Update player's score
+				const score = fieldCards[rowIdx].reduce((prev, cur) => prev + cur.score, 0);
+				fieldCards[rowIdx] = [];
+				const player = otherPlayers.find((player) => player.name === playerName);
+				if (player) {
+					player.score += score;
+				} else {
+					if (newGame.player.name === playerName) {
+						newGame.player.score += score;
+					} else throw "Player not found";
+				}
 
 				// Clear the row and add the card
 				fieldCards[rowIdx] = [];
 				fieldCards[rowIdx].push(card);
-				// TODO: add score to the player
 
 				// Delete the leftmost played card, it should be as same as the variable "card"
 				newGame.playedCardInfo.shift();
@@ -86,7 +117,7 @@ export function useGame() {
 		// ! Used for mocked server
 		setTimeout(() => {
 			setCnt((cnt) => cnt + 1);
-		}, 1350);
+		}, interval);
 	}, []);
 
 	const onAllPlayerPlayed = useCallback((gameUpdateEvent: AllPlayerPlayedEvent) => {
@@ -103,7 +134,7 @@ export function useGame() {
 		// ! Used for mocked server
 		setTimeout(() => {
 			setCnt((cnt) => cnt + 1);
-		}, 1350);
+		}, interval);
 	}, []);
 
 	// Listen for every game events
@@ -117,6 +148,9 @@ export function useGame() {
 					switch (gameEvent.type) {
 						case "game start":
 							onGameStart(gameEvent as GameStartEvent);
+							break;
+						case "game over":
+							onGameOver(gameEvent as GameOverEvent);
 							break;
 						case "all player played":
 							onAllPlayerPlayed(gameEvent as AllPlayerPlayedEvent);
@@ -273,6 +307,29 @@ export function useGame() {
 				type: "start card selection",
 			};
 			onGameEvent(startCardSelectionEvent);
+
+			if (game && game?.player.cards.length === 0) {
+				let minScore = Number.MAX_SAFE_INTEGER;
+				for (const player of game.otherPlayers) {
+					minScore = Math.min(minScore, player.score);
+				}
+				minScore = Math.min(minScore, game.player.score);
+
+				const winners: (Player | SelfPlayer)[] = [];
+				for (const player of game.otherPlayers) {
+					if (player.score === minScore) {
+						winners.push(player);
+					}
+				}
+				if (game.player.score === minScore) winners.push(game.player);
+
+				const gameOverEvent: GameOverEvent = {
+					id: generateUid(),
+					type: "game over",
+					winners,
+				};
+				onGameEvent(gameOverEvent);
+			}
 		}
 	}, [game]);
 
@@ -283,12 +340,25 @@ export function useGame() {
 		}
 	}, [cnt]);
 
+	// ! Used for mocked server
+	useEffect(() => {
+		const mockedGameStartEvent: GameStartEvent = {
+			type: "game start",
+			id: generateUid(),
+			player: randomSelfPlayer(),
+			otherPlayers: [...Array.from(Array(4).keys()).map((i) => randomPlayer(i + 1))], // 4 random other players
+			initialFieldCards: [...Array.from(Array(4).keys()).map(() => randomCard())], // 4 random initial field cards
+		};
+		onGameEvent(mockedGameStartEvent);
+	}, []);
+
 	return {
 		game,
 		selectedHandCardId,
 		playedCardInfo: game?.playedCardInfo,
 		inRowSelectionMode,
 		inCardSelectionMode,
+		winners,
 		selectRow,
 		selectHandCard,
 		playCard,

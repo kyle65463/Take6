@@ -3,6 +3,7 @@ import { Player, SelfPlayer } from "./player";
 
 export type GameEventType =
 	| "game start"
+	| "game over"
 	| "all player played"
 	| "append row"
 	| "clear row"
@@ -18,6 +19,10 @@ export interface GameStartEvent extends GameEvent {
 	player: SelfPlayer;
 	otherPlayers: Player[];
 	initialFieldCards: Card[]; // length === 4
+}
+
+export interface GameOverEvent extends GameEvent {
+	winners: (Player | SelfPlayer)[];
 }
 
 export interface AllPlayerPlayedEvent extends GameEvent {

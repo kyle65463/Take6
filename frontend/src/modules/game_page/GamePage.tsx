@@ -1,11 +1,8 @@
 import Button from "@common/components/Button";
-import { randomCard } from "@models/card";
-import { GameStartEvent } from "@models/game_events";
-import { randomPlayer, randomSelfPlayer } from "@models/player";
+import Modal from "@common/components/Modal";
 import DisplayCard from "@modules/game_page/DisplayCard";
-import { EventsContext, SocketContext } from "@utils/context";
-import { generateUid } from "@utils/utils";
-import { useContext, useEffect } from "react";
+import { SocketContext } from "@utils/context";
+import { useContext } from "react";
 import PlayerCard from "./PlayerCard";
 import { useGame } from "./useGame";
 
@@ -16,25 +13,13 @@ function GamePage() {
 		playedCardInfo,
 		inRowSelectionMode,
 		inCardSelectionMode,
+		winners,
 		selectRow,
 		selectHandCard,
 		playCard,
 	} = useGame();
 	const { socket } = useContext(SocketContext);
-	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const connecting = socket === undefined;
-
-	// ! Used for mocked server
-	useEffect(() => {
-		const mockedGameStartEvent: GameStartEvent = {
-			type: "game start",
-			id: generateUid(),
-			player: randomSelfPlayer(),
-			otherPlayers: [...Array.from(Array(4).keys()).map((i) => randomPlayer(i + 1))], // 4 random other players
-			initialFieldCards: [...Array.from(Array(4).keys()).map(() => randomCard())], // 4 random initial field cards
-		};
-		onGameEvent(mockedGameStartEvent);
-	}, []);
 
 	return (
 		<div className='layout'>
@@ -107,6 +92,27 @@ function GamePage() {
 								/>
 							))}
 						</div>
+
+						{/* Game over modal */}
+						<Modal
+							title='Game Over'
+							buttonText='Play again'
+							isShow={winners !== undefined}
+							closeModal={() => {
+								location.reload();
+							}}
+						>
+							<div>
+								<p>The game is over, the winner is:</p>
+								<div className='mt-10 mb-6'>
+									{winners?.map(({ name }) => (
+										<div className='flex justify-center items-end my-6'>
+											<span className='text-3xl font-bold'>{name}</span>
+										</div>
+									))}
+								</div>
+							</div>
+						</Modal>
 					</section>
 				</main>
 			)}
