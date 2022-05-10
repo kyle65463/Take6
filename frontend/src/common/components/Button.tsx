@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { MouseEventHandler } from "react";
 
-type ButtonStyle = "primary" | "secondary" | "outline" | "disabled";
+type ButtonStyle = "primary" | "secondary" | "outline" | "disabled" | "invisible";
 
 interface ButtonProps {
 	children?: JSX.Element | string;
@@ -19,6 +19,7 @@ function Button({ children, onClick, style }: ButtonProps) {
 				"btn-secondary": style === "secondary",
 				"btn-outline": style === "outline",
 				"btn-disabled": style === "disabled",
+				invisible: style === "invisible",
 			})}
 		>
 			{children}

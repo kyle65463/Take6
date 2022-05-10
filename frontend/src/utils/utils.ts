@@ -21,3 +21,7 @@ export function generateUid() {
 		return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
 	});
 }
+
+export function deepCopy(obj: any) {
+	return JSON.parse(JSON.stringify(obj));
+}

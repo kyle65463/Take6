@@ -1,6 +1,8 @@
+export type PlayerEventType = "play card";
+
 export interface PlayerEvent {
 	id: string;
-	type: string;
+	type: PlayerEventType;
 }
 
 export interface PlayCardEvent extends PlayerEvent {}

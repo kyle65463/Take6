@@ -1,3 +1,4 @@
+import Button from "@common/components/Button";
 import HandCard from "@common/components/HandCard";
 import { randomCard } from "@models/card";
 import { GameStartEvent } from "@models/game_events";
@@ -8,7 +9,7 @@ import { useContext, useEffect } from "react";
 import { useGame } from "./useGame";
 
 function GamePage() {
-	const { game, selectedHandCardId, selectHandCard } = useGame();
+	const { game, selectedHandCardId, selectHandCard, playCard } = useGame();
 	const { socket } = useContext(SocketContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const connecting = socket === undefined;
@@ -36,7 +37,7 @@ function GamePage() {
 							{game.fieldCards.map((row) => (
 								<div>
 									{row.map((card) => (
-										<div className='mr-4'>{card.number}</div>
+										<span className='mr-4'>{card.number}</span>
 									))}
 								</div>
 							))}
@@ -49,7 +50,16 @@ function GamePage() {
 					</div>
 
 					<section className='mt-12'>
-						<p className='text-xl mb-6 mx-12 font-bold'>{game.player.name}</p>
+						<div className='px-16 w-full flex justify-between items-center mb-6'>
+							<p className='text-xl font-bold'>{game.player.name}</p>
+							{selectedHandCardId !== undefined ? (
+								<Button style='primary' onClick={() => playCard(selectedHandCardId)}>
+									Confirm
+								</Button>
+							) : (
+								<Button style='invisible' />
+							)}
+						</div>
 
 						<div className='flex justify-center'>
 							{game.player.cards.map((card, i) => (

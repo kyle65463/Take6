@@ -5,7 +5,7 @@ export type GameEventType = "game start" | "game update";
 
 export interface GameEvent {
 	id: string;
-	type: string;
+	type: GameEventType;
 }
 
 export interface GameStartEvent extends GameEvent {
@@ -14,4 +14,7 @@ export interface GameStartEvent extends GameEvent {
 	initialFieldCards: Card[]; // length === 4
 }
 
-export interface GameUpdateEvent extends GameEvent {}
+export interface GameUpdateEvent extends GameEvent {
+	// The list of players and the card they played
+	playedCardInfo: { playerName: string; card: Card }[]; // length === numPlayer
+}
