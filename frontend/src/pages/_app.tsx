@@ -14,12 +14,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 	// Triggered when receiving new game event from server
 	const onGameEvent = useCallback((gameEvent: GameEvent) => {
-		console.log("generate new event");
-		console.log(gameEvent);
 		// Append the new event to the gameEvents array
 		setGameEvents((oldGameEvents) => {
-			console.log("new event list");
-			console.log([...oldGameEvents, gameEvent]);
 			return [...oldGameEvents, gameEvent];
 		});
 	}, []);

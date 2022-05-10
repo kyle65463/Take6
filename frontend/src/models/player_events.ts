@@ -1,4 +1,4 @@
-export type PlayerEventType = "play card";
+export type PlayerEventType = "play card" | "select row";
 
 export interface PlayerEvent {
 	id: string;
@@ -6,3 +6,7 @@ export interface PlayerEvent {
 }
 
 export interface PlayCardEvent extends PlayerEvent {}
+
+export interface SelectRowEvent extends PlayerEvent {
+	rowIdx: number;
+}

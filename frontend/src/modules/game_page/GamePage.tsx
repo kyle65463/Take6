@@ -9,7 +9,8 @@ import { useContext, useEffect } from "react";
 import { useGame } from "./useGame";
 
 function GamePage() {
-	const { game, selectedHandCardId, playedCardInfo, selectHandCard, playCard } = useGame();
+	const { game, selectedHandCardId, playedCardInfo, inRowSelectionMode, selectRow, selectHandCard, playCard } =
+		useGame();
 	const { socket } = useContext(SocketContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const connecting = socket === undefined;
@@ -30,15 +31,24 @@ function GamePage() {
 		<div className='layout'>
 			{/* <p>{connecting && <span>Connecting...</span>}</p> */}
 			{game && (
-				<main className='flex-1 flex flex-col justify-between mb-14'>
+				<main className='flex-1 flex flex-col justify-between mb-12'>
 					<div className='flex justify-between'>
 						{/* Field cards */}
-						<section className='mt-16'>
-							{game.fieldCards.map((row) => (
-								<div className='flex'>
-									{row.map((card) => (
-										<DisplayCard size='sm' card={card} />
-									))}
+						<section className='mt-12'>
+							{game.fieldCards.map((row, i) => (
+								<div className='flex items-center'>
+									<>
+										{row.map((card) => (
+											<DisplayCard size='sm' card={card} />
+										))}
+										{inRowSelectionMode && (
+											<div className='ml-8'>
+												<Button style='primary' onClick={() => selectRow(i)}>
+													Clear
+												</Button>
+											</div>
+										)}
+									</>
 								</div>
 							))}
 						</section>
