@@ -24,7 +24,7 @@ export function useGame() {
 	const { gameEvents, sendPlayerEvent, clearGameEvents } = useContext(EventsContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const [cnt, setCnt] = useState(0); // ! Used for mocked server
-	const interval = 350; // ! Used for mocked server
+	const interval = 1350; // ! Used for mocked server
 
 	const onGameStart = useCallback((gameStartEvent: GameStartEvent) => {
 		const { player, otherPlayers, initialFieldCards } = gameStartEvent;

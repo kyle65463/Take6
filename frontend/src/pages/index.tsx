@@ -1,7 +1,7 @@
-import HomePage from "@modules/home_page/HomePage";
+import GamePage from "@modules/game_page/GamePage";
 
 function index() {
-	return <HomePage />;
+	return <GamePage />;
 }
 
 export default index;
