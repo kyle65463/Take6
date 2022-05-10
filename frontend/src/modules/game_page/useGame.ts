@@ -5,6 +5,7 @@ import {
 	AppendRowEvent,
 	ClearRowEvent,
 	GameStartEvent,
+	StartCardSelectionEvent,
 	StartRowSelectionEvent,
 } from "@models/game_events";
 import { PlayCardEvent, SelectRowEvent } from "@models/player_events";
@@ -16,6 +17,7 @@ export function useGame() {
 	const [game, setGame] = useState<Game | undefined>();
 	const [selectedHandCardId, setSelctedHandCardId] = useState<number | undefined>();
 	const [inRowSelectionMode, setInRowSelectionMode] = useState(false);
+	const [inCardSelectionMode, setInCardSelectionMode] = useState(false);
 	const { gameEvents, sendPlayerEvent, clearGameEvents } = useContext(EventsContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const [cnt, setCnt] = useState(0); // ! Used for mocked server
@@ -30,6 +32,7 @@ export function useGame() {
 			fieldCards: [...initialFieldCards.map((card) => [card])],
 			playedCardInfo: [],
 		});
+		setInCardSelectionMode(true);
 	}, []);
 
 	const onAppendRow = useCallback((appendRowEvent: AppendRowEvent) => {
@@ -58,7 +61,7 @@ export function useGame() {
 		// ! Used for mocked server
 		setTimeout(() => {
 			setCnt((cnt) => cnt + 1);
-		}, 1000);
+		}, 1350);
 	}, []);
 
 	const onClearRow = useCallback((clearRowEvent: ClearRowEvent) => {
@@ -67,7 +70,6 @@ export function useGame() {
 			if (oldGame) {
 				const newGame: Game = deepCopy(oldGame);
 				const fieldCards = newGame.fieldCards;
-				console.log(rowIdx);
 				if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
 
 				// Clear the row and add the card
@@ -84,11 +86,7 @@ export function useGame() {
 		// ! Used for mocked server
 		setTimeout(() => {
 			setCnt((cnt) => cnt + 1);
-		}, 1000);
-	}, []);
-
-	const onStartRowSelection = useCallback((rowSelectionStartEvent: StartRowSelectionEvent) => {
-		setInRowSelectionMode(true);
+		}, 1350);
 	}, []);
 
 	const onAllPlayerPlayed = useCallback((gameUpdateEvent: AllPlayerPlayedEvent) => {
@@ -105,7 +103,7 @@ export function useGame() {
 		// ! Used for mocked server
 		setTimeout(() => {
 			setCnt((cnt) => cnt + 1);
-		}, 1000);
+		}, 1350);
 	}, []);
 
 	// Listen for every game events
@@ -130,7 +128,10 @@ export function useGame() {
 							onClearRow(gameEvent as ClearRowEvent);
 							break;
 						case "start row selection":
-							onStartRowSelection(gameEvent as StartRowSelectionEvent);
+							setInRowSelectionMode(true);
+							break;
+						case "start card selection":
+							setInCardSelectionMode(true);
 							break;
 					}
 				}
@@ -193,6 +194,7 @@ export function useGame() {
 				player.cards.splice(idx, 1);
 				sendPlayerEvent(playCardEvent);
 				setSelctedHandCardId(undefined); // Unselect the hand card
+				setInCardSelectionMode(false);
 
 				// ! Used for mocked server
 				const allPlayerPlayedEvent: AllPlayerPlayedEvent = {
@@ -264,6 +266,13 @@ export function useGame() {
 				onGameEvent(appendRowEvent);
 			}
 			return newGame;
+		} else {
+			// ! Used for mocked server
+			const startCardSelectionEvent: StartCardSelectionEvent = {
+				id: generateUid(),
+				type: "start card selection",
+			};
+			onGameEvent(startCardSelectionEvent);
 		}
 	}, [game]);
 
@@ -279,6 +288,7 @@ export function useGame() {
 		selectedHandCardId,
 		playedCardInfo: game?.playedCardInfo,
 		inRowSelectionMode,
+		inCardSelectionMode,
 		selectRow,
 		selectHandCard,
 		playCard,

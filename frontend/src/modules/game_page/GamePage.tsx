@@ -9,8 +9,16 @@ import { useContext, useEffect } from "react";
 import { useGame } from "./useGame";
 
 function GamePage() {
-	const { game, selectedHandCardId, playedCardInfo, inRowSelectionMode, selectRow, selectHandCard, playCard } =
-		useGame();
+	const {
+		game,
+		selectedHandCardId,
+		playedCardInfo,
+		inRowSelectionMode,
+		inCardSelectionMode,
+		selectRow,
+		selectHandCard,
+		playCard,
+	} = useGame();
 	const { socket } = useContext(SocketContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const connecting = socket === undefined;
@@ -88,9 +96,10 @@ function GamePage() {
 						<div className='flex justify-center'>
 							{game.player.cards.map((card, i) => (
 								<DisplayCard
-									onClick={() => selectHandCard(i)}
+									onClick={inCardSelectionMode ? () => selectHandCard(i) : undefined}
 									card={card}
 									selected={i === selectedHandCardId}
+									disabled={!inCardSelectionMode}
 								/>
 							))}
 						</div>

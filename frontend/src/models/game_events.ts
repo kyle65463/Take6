@@ -1,7 +1,13 @@
 import { Card } from "./card";
 import { Player, SelfPlayer } from "./player";
 
-export type GameEventType = "game start" | "all player played" | "append row" | "clear row" | "start row selection";
+export type GameEventType =
+	| "game start"
+	| "all player played"
+	| "append row"
+	| "clear row"
+	| "start row selection"
+	| "start card selection";
 
 export interface GameEvent {
 	id: string;
@@ -32,3 +38,5 @@ export interface ClearRowEvent extends GameEvent {
 }
 
 export interface StartRowSelectionEvent extends GameEvent {}
+
+export interface StartCardSelectionEvent extends GameEvent {}
