@@ -14,10 +14,18 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 	// Triggered when receiving new game event from server
 	const onGameEvent = useCallback((gameEvent: GameEvent) => {
+		console.log("generate new event");
+		console.log(gameEvent);
 		// Append the new event to the gameEvents array
 		setGameEvents((oldGameEvents) => {
+			console.log("new event list");
+			console.log([...oldGameEvents, gameEvent]);
 			return [...oldGameEvents, gameEvent];
 		});
+	}, []);
+
+	const clearGameEvents = useCallback(() => {
+		setGameEvents([]);
 	}, []);
 
 	// Init the socket and add it to the socket context when connected
@@ -46,7 +54,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 	return (
 		<SocketContext.Provider value={{ socket, connectServer }}>
-			<EventsContext.Provider value={{ gameEvents, sendPlayerEvent, onGameEvent }}>
+			<EventsContext.Provider value={{ gameEvents, sendPlayerEvent, onGameEvent, clearGameEvents }}>
 				<Head>
 					<title>Take6</title>
 					<link rel='icon' href='/favicon.ico' />

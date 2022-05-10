@@ -14,6 +14,7 @@ export const SocketContext = createContext<SocketContextProps>({
 
 interface EventsContextProps {
 	gameEvents: GameEvent[];
+	clearGameEvents: () => void;
 	sendPlayerEvent: (playerEvent: PlayerEvent) => void;
 	onGameEvent: (gameEvent: GameEvent) => void;
 }
@@ -21,5 +22,6 @@ interface EventsContextProps {
 export const EventsContext = createContext<EventsContextProps>({
 	gameEvents: [],
 	sendPlayerEvent: (playerEvent: PlayerEvent) => {},
+	clearGameEvents: () => {},
 	onGameEvent: (gameEvent: GameEvent) => {},
 });

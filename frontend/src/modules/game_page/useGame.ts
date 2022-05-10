@@ -1,6 +1,6 @@
-import { Card, randomCard } from "@models/card";
+import { randomCard } from "@models/card";
 import { Game } from "@models/game";
-import { GameStartEvent, GameUpdateEvent } from "@models/game_events";
+import { AllPlayerPlayedEvent, GameStartEvent, RowUpdateEvent } from "@models/game_events";
 import { PlayCardEvent } from "@models/player_events";
 import { EventsContext } from "@utils/context";
 import { deepCopy, generateUid } from "@utils/utils";
@@ -8,10 +8,10 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 export function useGame() {
 	const [game, setGame] = useState<Game | undefined>();
-	const [playedCardInfo, setPlayedCardInfo] = useState<{ playerName: string; card: Card }[]>();
 	const [selectedHandCardId, setSelctedHandCardId] = useState<number | undefined>();
-	const { gameEvents, sendPlayerEvent } = useContext(EventsContext);
+	const { gameEvents, sendPlayerEvent, clearGameEvents } = useContext(EventsContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
+	const [cnt, setCnt] = useState(0); // ! Used for mocked server
 
 	const onGameStart = useCallback((gameStartEvent: GameStartEvent) => {
 		const { player, otherPlayers, initialFieldCards } = gameStartEvent;
@@ -20,62 +20,70 @@ export function useGame() {
 			player,
 			otherPlayers,
 			fieldCards: [...initialFieldCards.map((card) => [card])],
+			playedCardInfo: [],
 		});
 	}, []);
 
-	const onGameUpdate = useCallback((gameUpdateEvent: GameUpdateEvent) => {
+	const onRowUpdate = useCallback((rowUpdateEvent: RowUpdateEvent) => {
+		const { card, rowIdx } = rowUpdateEvent;
+		setGame((oldGame) => {
+			if (oldGame) {
+				const newGame: Game = deepCopy(oldGame);
+				const fieldCards = newGame.fieldCards;
+				// Add the card to the target row
+				if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
+				fieldCards[rowIdx].push(card);
+				// Delete the leftmost played card, it should be as same as the variable "card"
+				newGame.playedCardInfo.shift();
+				return newGame;
+			}
+		});
+
+		// ! Used for mocked server
+		setTimeout(() => {
+			setCnt((cnt) => cnt + 1);
+		}, 1000);
+	}, []);
+
+	const onAllPlayerPlayed = useCallback((gameUpdateEvent: AllPlayerPlayedEvent) => {
 		const { playedCardInfo } = gameUpdateEvent;
 		playedCardInfo.sort((a, b) => a.card.number - b.card.number);
-		setPlayedCardInfo(playedCardInfo);
+		setGame((oldGame) => {
+			if (oldGame) {
+				const newGame: Game = deepCopy(oldGame);
+				newGame.playedCardInfo = playedCardInfo;
+				return newGame;
+			}
+		});
 
-		// Append each card to the end of the corresponding row by the rule
-		// setGame((oldGame) => {
-		// 	if (oldGame) {
-		// 		const newGame = deepCopy(oldGame);
-		// 		const fieldCards = newGame.fieldCards;
-		// 		playedCardInfo.forEach(({ card }) => {
-		// 			// Find the best match row for each played card
-		// 			let bestMatchRowIdx: number | undefined;
-		// 			let maxCardNumber: number | undefined;
-
-		// 			// Iterate every rows
-		// 			for (let i = 0; i < fieldCards.length; i++) {
-		// 				const row = fieldCards[i];
-		// 				if (row.length === 0) throw "Invalid card number of a row";
-		// 				const lastCardNumber = row[row.length - 1].number; // The rightmost number of a row
-		// 				if (lastCardNumber < card.number && (!maxCardNumber || lastCardNumber > maxCardNumber)) {
-		// 					// Update the best matched row idx
-		// 					bestMatchRowIdx = i;
-		// 					maxCardNumber = lastCardNumber;
-		// 				}
-		// 			}
-		// 			if (bestMatchRowIdx === undefined || maxCardNumber === undefined) {
-		// 			} else {
-		// 				// Append the played card to the corresponding row
-		// 				fieldCards[bestMatchRowIdx].push(card);
-		// 			}
-		// 		});
-		// 		return newGame;
-		// 	}
-		// });
+		// ! Used for mocked server
+		setTimeout(() => {
+			setCnt((cnt) => cnt + 1);
+		}, 1000);
 	}, []);
 
 	// Listen for every game events
 	useEffect(() => {
 		// TODO: catch errors?
-		while (gameEvents.length > 0) {
-			const gameEvent = gameEvents.shift(); // Pop the first element
-			if (gameEvent) {
-				// Handle the game event
-				switch (gameEvent.type) {
-					case "game start":
-						onGameStart(gameEvent as GameStartEvent);
-						break;
-					case "game update":
-						onGameUpdate(gameEvent as GameUpdateEvent);
-						break;
+		if (gameEvents.length > 0) {
+			while (gameEvents.length > 0) {
+				const gameEvent = gameEvents.shift(); // Pop the first element
+				if (gameEvent) {
+					// Handle the game event
+					switch (gameEvent.type) {
+						case "game start":
+							onGameStart(gameEvent as GameStartEvent);
+							break;
+						case "all player played":
+							onAllPlayerPlayed(gameEvent as AllPlayerPlayedEvent);
+							break;
+						case "row update":
+							onRowUpdate(gameEvent as RowUpdateEvent);
+							break;
+					}
 				}
 			}
+			clearGameEvents();
 		}
 	}, [gameEvents]);
 
@@ -108,9 +116,9 @@ export function useGame() {
 				setSelctedHandCardId(undefined); // Unselect the hand card
 
 				// ! Used for mocked server
-				const gameUpdateEvent: GameUpdateEvent = {
+				const allPlayerPlayedEvent: AllPlayerPlayedEvent = {
 					id: generateUid(),
-					type: "game update",
+					type: "all player played",
 					playedCardInfo: [
 						{ playerName: player.name, card: playedCard },
 						...otherPlayers.map((otherPlayer) => ({
@@ -119,11 +127,63 @@ export function useGame() {
 						})),
 					],
 				};
-				onGameEvent(gameUpdateEvent);
+				onGameEvent(allPlayerPlayedEvent);
 			}
 		},
 		[game]
 	);
 
-	return { game, selectedHandCardId, playedCardInfo, selectHandCard, playCard };
+	// ! Used for mocked server
+	const decideRow = useCallback(() => {
+		if (game && game.playedCardInfo.length > 0) {
+			const newGame: Game = deepCopy(game);
+			const { playedCardInfo, fieldCards } = newGame;
+
+			// Find the best match row for the leftmost played card
+			const { card } = playedCardInfo[0];
+			let bestMatchRowIdx: number | undefined;
+			let maxCardNumber: number | undefined;
+
+			// Iterate every rows
+			for (let i = 0; i < fieldCards.length; i++) {
+				const row = fieldCards[i];
+				if (row.length === 0) throw "Invalid card number of a row";
+				const lastCardNumber = row[row.length - 1].number; // The rightmost number of a row
+				if (lastCardNumber < card.number && (!maxCardNumber || lastCardNumber > maxCardNumber)) {
+					// Update the best matched row idx
+					bestMatchRowIdx = i;
+					maxCardNumber = lastCardNumber;
+				}
+			}
+
+			if (bestMatchRowIdx === undefined || maxCardNumber === undefined) {
+				// TODO: Choose a row to clear
+				const rowUpdateEvent: RowUpdateEvent = {
+					id: generateUid(),
+					type: "row update",
+					card,
+					rowIdx: 0,
+				};
+				onGameEvent(rowUpdateEvent);
+			} else {
+				const rowUpdateEvent: RowUpdateEvent = {
+					id: generateUid(),
+					type: "row update",
+					card,
+					rowIdx: bestMatchRowIdx,
+				};
+				onGameEvent(rowUpdateEvent);
+			}
+			return newGame;
+		}
+	}, [game]);
+
+	// ! Used for mocked server
+	useEffect(() => {
+		if (cnt > 0) {
+			decideRow();
+		}
+	}, [cnt]);
+
+	return { game, selectedHandCardId, playedCardInfo: game?.playedCardInfo, selectHandCard, playCard };
 }

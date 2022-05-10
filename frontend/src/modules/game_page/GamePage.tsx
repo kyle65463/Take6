@@ -35,7 +35,7 @@ function GamePage() {
 						{/* Field cards */}
 						<section className='mt-16'>
 							{game.fieldCards.map((row) => (
-								<div>
+								<div className='flex'>
 									{row.map((card) => (
 										<DisplayCard size='sm' card={card} />
 									))}
