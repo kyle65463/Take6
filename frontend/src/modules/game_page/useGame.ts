@@ -1,4 +1,4 @@
-import { randomCard } from "@models/card";
+import { Card, randomCard } from "@models/card";
 import { Game } from "@models/game";
 import { GameStartEvent, GameUpdateEvent } from "@models/game_events";
 import { PlayCardEvent } from "@models/player_events";
@@ -8,6 +8,7 @@ import { useCallback, useContext, useEffect, useState } from "react";
 
 export function useGame() {
 	const [game, setGame] = useState<Game | undefined>();
+	const [playedCardInfo, setPlayedCardInfo] = useState<{ playerName: string; card: Card }[]>();
 	const [selectedHandCardId, setSelctedHandCardId] = useState<number | undefined>();
 	const { gameEvents, sendPlayerEvent } = useContext(EventsContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
@@ -25,37 +26,38 @@ export function useGame() {
 	const onGameUpdate = useCallback((gameUpdateEvent: GameUpdateEvent) => {
 		const { playedCardInfo } = gameUpdateEvent;
 		playedCardInfo.sort((a, b) => a.card.number - b.card.number);
+		setPlayedCardInfo(playedCardInfo);
 
 		// Append each card to the end of the corresponding row by the rule
-		setGame((oldGame) => {
-			if (oldGame) {
-				const newGame = deepCopy(oldGame);
-				const fieldCards = newGame.fieldCards;
-				playedCardInfo.forEach(({ card }) => {
-					// Find the best match row for each played card
-					let bestMatchRowIdx: number | undefined;
-					let maxCardNumber: number | undefined;
+		// setGame((oldGame) => {
+		// 	if (oldGame) {
+		// 		const newGame = deepCopy(oldGame);
+		// 		const fieldCards = newGame.fieldCards;
+		// 		playedCardInfo.forEach(({ card }) => {
+		// 			// Find the best match row for each played card
+		// 			let bestMatchRowIdx: number | undefined;
+		// 			let maxCardNumber: number | undefined;
 
-					// Iterate every rows
-					for (let i = 0; i < fieldCards.length; i++) {
-						const row = fieldCards[i];
-						if (row.length === 0) throw "Invalid card number of a row";
-						const lastCardNumber = row[row.length - 1].number; // The rightmost number of a row
-						if (lastCardNumber < card.number && (!maxCardNumber || lastCardNumber > maxCardNumber)) {
-							// Update the best matched row idx
-							bestMatchRowIdx = i;
-							maxCardNumber = lastCardNumber;
-						}
-					}
-					if (bestMatchRowIdx === undefined || maxCardNumber === undefined) {
-					} else {
-						// Append the played card to the corresponding row
-						fieldCards[bestMatchRowIdx].push(card);
-					}
-				});
-				return newGame;
-			}
-		});
+		// 			// Iterate every rows
+		// 			for (let i = 0; i < fieldCards.length; i++) {
+		// 				const row = fieldCards[i];
+		// 				if (row.length === 0) throw "Invalid card number of a row";
+		// 				const lastCardNumber = row[row.length - 1].number; // The rightmost number of a row
+		// 				if (lastCardNumber < card.number && (!maxCardNumber || lastCardNumber > maxCardNumber)) {
+		// 					// Update the best matched row idx
+		// 					bestMatchRowIdx = i;
+		// 					maxCardNumber = lastCardNumber;
+		// 				}
+		// 			}
+		// 			if (bestMatchRowIdx === undefined || maxCardNumber === undefined) {
+		// 			} else {
+		// 				// Append the played card to the corresponding row
+		// 				fieldCards[bestMatchRowIdx].push(card);
+		// 			}
+		// 		});
+		// 		return newGame;
+		// 	}
+		// });
 	}, []);
 
 	// Listen for every game events
@@ -123,5 +125,5 @@ export function useGame() {
 		[game]
 	);
 
-	return { game, selectedHandCardId, selectHandCard, playCard };
+	return { game, selectedHandCardId, playedCardInfo, selectHandCard, playCard };
 }

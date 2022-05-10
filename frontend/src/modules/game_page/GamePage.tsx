@@ -1,5 +1,5 @@
 import Button from "@common/components/Button";
-import HandCard from "@common/components/HandCard";
+import DisplayCard from "@common/components/DisplayCard";
 import { randomCard } from "@models/card";
 import { GameStartEvent } from "@models/game_events";
 import { randomPlayer, randomSelfPlayer } from "@models/player";
@@ -9,7 +9,7 @@ import { useContext, useEffect } from "react";
 import { useGame } from "./useGame";
 
 function GamePage() {
-	const { game, selectedHandCardId, selectHandCard, playCard } = useGame();
+	const { game, selectedHandCardId, playedCardInfo, selectHandCard, playCard } = useGame();
 	const { socket } = useContext(SocketContext);
 	const { onGameEvent } = useContext(EventsContext); // ! Used for mocked server
 	const connecting = socket === undefined;
@@ -28,29 +28,43 @@ function GamePage() {
 
 	return (
 		<div className='layout'>
-			<h1 className='text-4xl'>GAME</h1>
 			{/* <p>{connecting && <span>Connecting...</span>}</p> */}
 			{game && (
-				<main className='flex-1 flex flex-col justify-between mb-24'>
+				<main className='flex-1 flex flex-col justify-between mb-14'>
 					<div className='flex justify-between'>
-						<section className='mt-12'>
+						{/* Field cards */}
+						<section className='mt-16'>
 							{game.fieldCards.map((row) => (
 								<div>
 									{row.map((card) => (
-										<span className='mr-4'>{card.number}</span>
+										<DisplayCard size='sm' card={card} />
 									))}
 								</div>
 							))}
 						</section>
-						<section className='mt-12'>
-							{game.otherPlayers.map((player) => (
-								<p key={player.name}>{player.name}</p>
-							))}
-						</section>
+
+						<div className='flex items-center mt-16'>
+							{/* Played cards */}
+							<section className='flex mr-16'>
+								{playedCardInfo?.map(({ playerName, card }) => (
+									<div className=''>
+										<p className='mb-2'>{playerName}</p>
+										<DisplayCard size='sm' card={card} />
+									</div>
+								))}
+							</section>
+
+							{/* Players info */}
+							<section>
+								{game.otherPlayers.map((player) => (
+									<p key={player.name}>{player.name}</p>
+								))}
+							</section>
+						</div>
 					</div>
 
 					<section className='mt-12'>
-						<div className='px-16 w-full flex justify-between items-center mb-6'>
+						<div className='px-16 w-full flex justify-between items-end mb-4'>
 							<p className='text-xl font-bold'>{game.player.name}</p>
 							{selectedHandCardId !== undefined ? (
 								<Button style='primary' onClick={() => playCard(selectedHandCardId)}>
@@ -63,7 +77,7 @@ function GamePage() {
 
 						<div className='flex justify-center'>
 							{game.player.cards.map((card, i) => (
-								<HandCard
+								<DisplayCard
 									onClick={() => selectHandCard(i)}
 									card={card}
 									selected={i === selectedHandCardId}
