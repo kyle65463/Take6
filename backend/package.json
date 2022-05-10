@@ -1,7 +1,8 @@
 {
-    "name": "take6",
+    "name": "take6-backend",
     "description": "CNL final project 2022",
     "version": "1.0.0",
+    "private": true,
     "main": "src/index.js",
     "type": "module",
     "scripts": {
