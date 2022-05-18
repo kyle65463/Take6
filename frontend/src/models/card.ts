@@ -17,6 +17,6 @@ export function randomCard(): Card {
 	numberList.push(randInt);
 	return {
 		number: randInt,
-		score: getRandomInt(1, 3),
+		score: getRandomInt(1, 4),
 	};
 }
