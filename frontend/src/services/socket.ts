@@ -9,14 +9,14 @@ interface InitSocketProps {
 	onGameEvent: (gameEvent: GameEvent) => void;
 }
 
-export function initSocket({ onConnect }: InitSocketProps) {
+export function initSocket({ onConnect, onGameEvent }: InitSocketProps) {
 	const socket = io("ws://localhost:8888");
 	socket.on("connect", (...args) => {
 		onConnect(socket);
 	});
 
-	socket.on("some event", (...args) => {
-		// onGameEvent()
+	socket.on("game event", (gameEvent) => {
+		onGameEvent(gameEvent);
 	});
 	return socket;
 }
