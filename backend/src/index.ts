@@ -1,5 +1,5 @@
 import { createServer } from "http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { UpdateGameStatusEvent } from "./models/game_events";
 import { PlayCardEvent, PlayerEvent, SelectRowEvent } from "./models/player_events";
 import {GameStart, playOneRound, sendGameEvent} from "./logic";
@@ -14,7 +14,8 @@ export const io = new Server(httpServer, {
   }
 });
 httpServer.listen(8888);
-const socket: Socket = undefined;
+// const socket: Socket = undefined;
+let socket: Socket|undefined = undefined;
 
 
 
@@ -38,8 +39,8 @@ let numEvents: number = 0;
 io.on("connection", (socket: Socket) => {
   console.log("connected");
   let client: SelfPlayer = {
-    id: socket.id, //use socketId as client's id
-    name: undefined,
+    id: parseInt(socket.id), //use socketId as client's id  // use parseInt to number from string
+    name: "", // TODO: name?
     cards: [],
     score: 0
   };
@@ -65,7 +66,7 @@ io.on("connection", (socket: Socket) => {
 // ***main function***
 while(true){
   if(id === 6){
-    play(socket);
+    play(socket!);
     break;
   }
 }

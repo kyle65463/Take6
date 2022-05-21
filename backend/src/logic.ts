@@ -1,4 +1,4 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { clientList, io, onSelectRow, playerEvents, setRowEventFlag } from ".";
 import { Card, randomCard } from "./models/card";
 import { GameEventType, ModeType, UpdateGameStatusEvent } from "./models/game_events";
@@ -7,12 +7,13 @@ import { PlayCardEvent, PlayerEvent, SelectRowEvent } from "./models/player_even
 
 
 // maintain fieldCards and playedCardInfo
-let gameEvent: UpdateGameStatusEvent = undefined;
+let gameEvent: UpdateGameStatusEvent;
 
 //send UpdateGameStatusEvent interface to client
 export function sendGameEvent(mode: ModeType, gameEventType: GameEventType, selfPlayer: SelfPlayer){
-  let newGameEvent: UpdateGameStatusEvent = undefined;
-  newGameEvent.player = selfPlayer;
+  // let newGameEvent: UpdateGameStatusEvent = undefined; 
+  let otherPlayers: Player[] = [];
+  // newGameEvent.player = selfPlayer;
   for(let i = 0; i < 6; i++){
     if(clientList[i].id != selfPlayer.id){
       let player: Player = {
@@ -20,18 +21,29 @@ export function sendGameEvent(mode: ModeType, gameEventType: GameEventType, self
         name: selfPlayer.name,
         score: selfPlayer.score
       }
-      newGameEvent.otherPlayers.push(player)
+      // newGameEvent.otherPlayers.push(player)
+      otherPlayers.push(player)
     }
   }
-  newGameEvent.fieldCards = gameEvent.fieldCards;
-  newGameEvent.mode = mode;
-  newGameEvent.playedCardInfo = gameEvent.playedCardInfo;
-  io.sockets.socket(selfPlayer.id).emit(gameEventType, newGameEvent);
+  let newGameEvent: UpdateGameStatusEvent = {
+    player: selfPlayer,
+    otherPlayers: otherPlayers,
+    mode: mode,
+    playedCardInfo:  gameEvent.playedCardInfo,
+    fieldCards: [], // TODO: the field cards?
+    id: String(selfPlayer.id), // TODO: which id to use?
+    type: gameEventType
+  };
+  // newGameEvent.fieldCards = gameEvent.fieldCards;
+  // newGameEvent.mode = mode;
+  // newGameEvent.playedCardInfo = gameEvent.playedCardInfo;
+  // io.sockets.socket(selfPlayer.id).emit(gameEventType, newGameEvent);
+  io.sockets.emit(gameEventType, newGameEvent)
 }
 
 export function GameStart(socket: Socket){
   //generate initial board
-  let fieldCards: Card[][];
+  let fieldCards: Card[][] = [];
   for(let i = 0; i < 4; i++)
     fieldCards[i].push(randomCard());
 
@@ -42,7 +54,7 @@ export function GameStart(socket: Socket){
   for(let i = 0; i < 6; i++){
     let id = clientList[i].id;
     let player = randomSelfPlayer(id);
-    sendGameEvent("card selection", "game start" player);
+    sendGameEvent("card selection", "game start", player);
   }
 }
 
@@ -54,10 +66,11 @@ export function playOneRound(socket: Socket){
   let fieldCards = gameEvent.fieldCards;
 
   while (playerEvents.length > 0) {
-    let PlayerEvent = playerEvents.shift();
+    let PlayerEvent = playerEvents.shift()!; // add ! to assume that it will not be undefined
     let {flag, card} = onPlayCard(socket, PlayerEvent, fieldCards);
     if(flag == true){
-      onSelectRow(fieldCards, card);
+      onSelectRow(fieldCards, card!); // add ! to assume that it will not be undefined
+
     }
   }
   return;
