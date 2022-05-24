@@ -10,4 +10,5 @@ export interface Game {
 
   // The list of players and the card they played for this round
   playedCardInfo: { playerName: string; card: Card }[];
+  selectRowPlayer?: Player;
 }

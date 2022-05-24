@@ -52,7 +52,7 @@ io.on("connection", (socket: Socket) => {
 
   //play event handler: collect 6 playerEvents in a round
   socket.on("player event", (playerEvent: PlayerEvent) => {
-    console.log(playerEvent);
+    console.log("event: ", playerEvent.type);
     switch (playerEvent.type) {
       case "play card":
         playerPlayedCard(game, playerEvent as PlayCardEvent);
@@ -71,7 +71,7 @@ io.on("connection", (socket: Socket) => {
 
 function gameStart(game: Game) {
   //generate initial board
-  const {clients} = game;
+  const { clients } = game;
   const initialFieldCards: Card[] = [];
   for (let i = 0; i < 4; i++) {
     const card: Card = randomCard();
@@ -89,47 +89,114 @@ function gameStart(game: Game) {
       otherPlayers: otherPlayers,
       initialFieldCards: initialFieldCards,
     };
-    console.log(clients[i].player);
+    // console.log(clients[i].player);
     clients[i].socket.emit("game event", gameStartEvent);
   }
 }
 
-function getOtherPlayers(clients: Client[], player: Player): Omit<Player, "cards">[] {
+function getOtherPlayers(
+  clients: Client[],
+  player: Player
+): Omit<Player, "cards">[] {
   const otherPlayers: Omit<Player, "cards">[] = clients
-      .filter((client) => client.player.id != player.id)
-      .map(({ player: { id, score, name } }) => ({ id, score, name }));
+    .filter((client) => client.player.id != player.id)
+    .map(({ player: { id, score, name } }) => ({ id, score, name }));
   return otherPlayers;
 }
 
-function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
+async function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
   const { player, card } = playCardEvent;
   game.playedCardInfo.push({ playerName: player.name, card });
 
-  const foundPlayer = game.clients.find((e) => e.player.id == player.id)?.player;
+  const foundPlayer = game.clients.find(
+    (e) => e.player.id == player.id
+  )?.player;
   if (!foundPlayer) {
     console.log("fk frontend");
     return;
   }
   foundPlayer.cards = foundPlayer.cards.filter((e) => e.number != card.number);
-  console.log(foundPlayer.cards);
+  // console.log(foundPlayer.cards);
 
   if (game.playedCardInfo.length === game.clients.length) {
+    game.playedCardInfo.sort((a, b) => a.card.number - b.card.number);
     updateGameStatus(game);
+    for (let i = 0; i < game.clients.length; i++) {
+      decideRow(game);
+      await delay(1000);
+      updateGameStatus(game);
+      if (game.selectRowPlayer) {
+        game.selectRowPlayer = undefined;
+        break;
+      }
+    }
   }
 }
 
+function delay(time: number) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 function updateGameStatus(game: Game) {
-  const { clients, fieldCards, mode, playedCardInfo } = game;
-  for (const {player, socket} of clients) {
+  const { clients, fieldCards, mode, playedCardInfo, selectRowPlayer } = game;
+  for (const { player, socket } of clients) {
     const otherPlayers = getOtherPlayers(clients, player);
     const updateGameStatusEvent: UpdateGameStatusEvent = {
       player,
       otherPlayers,
       fieldCards,
-      mode,
+      mode: selectRowPlayer && player.id == selectRowPlayer.id ? "row selection" : mode,
       playedCardInfo,
-      type: "game status update"
+      type: "game status update",
     };
     socket.emit("game event", updateGameStatusEvent);
+  }
+}
+
+function decideRow(game: Game) {
+  const { playedCardInfo, fieldCards, clients } = game;
+
+  // Find the best match row for the leftmost played card
+  const { playerName, card } = playedCardInfo[0];
+  console.log(game);
+  const player = clients.find((client) => client.player.name === playerName)?.player;
+  if (!player) {
+    console.log("player not found");
+    return;
+  }
+
+  let bestMatchRowIdx: number | undefined;
+  let maxCardNumber: number | undefined;
+
+  // Iterate every rows
+  for (let i = 0; i < fieldCards.length; i++) {
+    const row = fieldCards[i];
+    if (row.length === 0) throw "Invalid card number of a row";
+    const lastCardNumber = row[row.length - 1].number; // The rightmost number of a row
+    if (
+      lastCardNumber < card.number &&
+      (!maxCardNumber || lastCardNumber > maxCardNumber)
+    ) {
+      // Update the best matched row idx
+      bestMatchRowIdx = i;
+      maxCardNumber = lastCardNumber;
+    }
+  }
+
+  if (bestMatchRowIdx === undefined || maxCardNumber === undefined) {
+    game.selectRowPlayer = player;
+  } else {
+    fieldCards[bestMatchRowIdx].push(card);
+    if (fieldCards.length > 5) {
+      // The row is full, update player's score
+      const score = fieldCards[bestMatchRowIdx].reduce(
+        (prev, cur) => prev + cur.score,
+        0
+      );
+      player.score += score;
+      // Clear the row
+      fieldCards[bestMatchRowIdx] = [];
+    }
+    playedCardInfo.shift();
   }
 }
