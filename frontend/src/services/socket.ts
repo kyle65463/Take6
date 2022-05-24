@@ -16,6 +16,7 @@ export function initSocket({ onConnect, onGameEvent }: InitSocketProps) {
 	});
 
 	socket.on("game event", (gameEvent) => {
+		console.log(gameEvent);
 		onGameEvent(gameEvent);
 	});
 	return socket;
