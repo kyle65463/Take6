@@ -11,7 +11,7 @@ import { Card, randomCard } from "./models/card";
 import { SelfPlayer, SocketPlayer } from "./models/player";
 
 const httpServer = createServer();
-export const io = new Server(httpServer, {
+const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
@@ -62,16 +62,11 @@ io.on("connection", (socket: Socket) => {
         break;
     }
   });
-});
-
-// ***main function***
-while (true) {
   if (id === 6) {
     play();
-    break;
   }
-}
-// ******
+});
+
 
 function play() {
   playerEvents = [];

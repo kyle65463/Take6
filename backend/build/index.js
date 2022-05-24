@@ -47,15 +47,10 @@ exports.io.on("connection", (socket) => {
                 break;
         }
     });
-});
-// ***main function***
-while (true) {
     if (id === 6) {
         play();
-        break;
     }
-}
-// ******
+});
 function play() {
     exports.playerEvents = [];
     // set up the game, and then notify players
