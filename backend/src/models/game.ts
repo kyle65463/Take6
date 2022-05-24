@@ -1,17 +1,14 @@
 import { Card } from "./card";
-import { Player, SelfPlayer } from "./player";
+import { Player } from "./player";
 
-export type ModeType = 
-	| "card selection"
-	| "row selection"
-	| "none";
+export type ModeType = "card selection" | "row selection" | "none";
 
 export interface Game {
-	player: SelfPlayer;
-	otherPlayers: Player[];
-	fieldCards: Card[][];
-	mode: ModeType;
+  player: Player;
+  otherPlayers: Omit<Player, "cards">[];
+  fieldCards: Card[][];
+  mode: ModeType;
 
-	// The list of players and the card they played for this round
-	playedCardInfo: { playerName: string; card: Card }[];
+  // The list of players and the card they played for this round
+  playedCardInfo: { playerName: string; card: Card }[];
 }

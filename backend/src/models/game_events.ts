@@ -1,33 +1,29 @@
 import { Card } from "./card";
 import { ModeType } from "./game";
-import { Player, SelfPlayer } from "./player";
+import { Player} from "./player";
 
-export type GameEventType =
-	| "game start"
-	| "game over"
-	| "game status update";
+export type GameEventType = "game start" | "game over" | "game status update";
 
 export interface GameEvent {
-	id: string;
-	type: GameEventType;
+  type: GameEventType;
 }
 
 export interface GameStartEvent extends GameEvent {
-	player: SelfPlayer;
-	otherPlayers: Player[];
-	initialFieldCards: Card[]; // length === 4
+  player: Player;
+  otherPlayers: Omit<Player, "cards">[];
+  initialFieldCards: Card[]; // length === 4
 }
 
 export interface GameOverEvent extends GameEvent {
-	winners: (Player | SelfPlayer)[];
+  winners: (Player | Player)[];
 }
 
 export interface UpdateGameStatusEvent extends GameEvent {
-	player: SelfPlayer;
-	otherPlayers: Player[];
-	fieldCards: Card[][];
-	mode: ModeType;
+  player: Player;
+  otherPlayers: Omit<Player, "cards">[];
+  fieldCards: Card[][];
+  mode: ModeType;
 
-	// The list of players and the card they played for this round
-	playedCardInfo: { playerName: string; card: Card }[]; // minus one per round
+  // The list of players and the card they played for this round
+  playedCardInfo: { playerName: string; card: Card }[]; // minus one per round
 }
