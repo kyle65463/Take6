@@ -1,10 +1,10 @@
 import { Card } from "./card";
-import { Player } from "./player";
+import { Client, Player } from "./player";
 
 export type ModeType = "card selection" | "row selection" | "none";
 
 export interface Game {
-  players: Player[];
+  clients: Client[];
   fieldCards: Card[][];
   mode: ModeType;
 
