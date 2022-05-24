@@ -1,8 +1,8 @@
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
-import { UpdateGameStatusEvent } from "./models/game_events";
+import { GameEvent, GameStartEvent, UpdateGameStatusEvent } from "./models/game_events";
 import { PlayCardEvent, PlayerEvent, SelectRowEvent } from "./models/player_events";
-import { Card } from "./models/card";
+import { Card, randomCard } from "./models/card";
 import { SelfPlayer } from "./models/player";
 
 const httpServer = createServer();
@@ -26,7 +26,7 @@ let RowEvent: SelectRowEvent;
 let RowEventFlag: boolean;
 
 // keep client id from 0 to 5
-let id: number = 0;
+let numPlayer: number = 0;
 
 //database of 6 players
 export let clientList: SelfPlayer[] = [];
@@ -45,7 +45,7 @@ io.on("connection", (socket: Socket) => {
   };
   console.log(client);
   clientList.push(client);
-  id++;
+  numPlayer++;
 
   //play event handler: collect 6 playerEvents in a round
   socket.on('play event', function (playerEvent: PlayerEvent) {
@@ -61,4 +61,15 @@ io.on("connection", (socket: Socket) => {
         break;
     }
   });
+
+  if (numPlayer == 2) {
+    const cunt: GameStartEvent = {
+      id: "bitch#1",
+      type: "game start",
+      player: client,
+      otherPlayers: [client],
+      initialFieldCards: [randomCard(), randomCard(), randomCard(), randomCard()]
+    };
+    socket.emit("game event", cunt);
+  }
 });
