@@ -4,8 +4,7 @@ import { Player } from "./player";
 export type ModeType = "card selection" | "row selection" | "none";
 
 export interface Game {
-  player: Player;
-  otherPlayers: Omit<Player, "cards">[];
+  players: Player[];
   fieldCards: Card[][];
   mode: ModeType;
 

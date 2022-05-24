@@ -8,6 +8,7 @@ import {
 } from "./models/player_events";
 import { Card, randomCard } from "./models/card";
 import { Player, Client } from "./models/player";
+import { Game } from "./models/game";
 
 const httpServer = createServer();
 export const io = new Server(httpServer, {
@@ -27,33 +28,38 @@ export let playerEvents: PlayCardEvent[] = [];
 let RowEvent: SelectRowEvent;
 let RowEventFlag: boolean;
 
+const game: Game = {
+  players: [],
+  fieldCards: [[], [], [], []],
+  mode: "none",
+  playedCardInfo: [],
+};
+
 //database of 6 players
 let clients: Client[] = [];
-
-// collect 6 playerEvents in a round, change in the play event handler below
-let numEvents: number = 0;
 
 // io handler: wait for connection
 io.on("connection", (socket: Socket) => {
   console.log("connected");
+  const player: Player = {
+    id: socket.id, //use socketId as client's id
+    name: socket.id, // TODO: name?
+    cards: Array.from(Array(10).keys()).map(() => randomCard()),
+    score: 0,
+  };
   const client: Client = {
-    player: {
-      id: socket.id, //use socketId as client's id
-      name: socket.id, // TODO: name?
-      cards: [],
-      score: 0,
-    },
+    player: player,
     socket: socket,
   };
+  game.players.push(player);
   clients.push(client);
 
   //play event handler: collect 6 playerEvents in a round
-  socket.on("play event", function (playerEvent: PlayerEvent) {
+  socket.on("player event", (playerEvent: PlayerEvent) => {
+    console.log(playerEvent);
     switch (playerEvent.type) {
       case "play card":
-        let onePlayerEvent = playerEvent as PlayCardEvent;
-        playerEvents.push(onePlayerEvent);
-        numEvents++;
+        playerPlayedCard(game, playerEvent as PlayCardEvent);
         break;
       case "select row":
         RowEvent = playerEvent as SelectRowEvent;
@@ -71,7 +77,9 @@ function gameStart(clients: Client[]) {
   //generate initial board
   const initialFieldCards: Card[] = [];
   for (let i = 0; i < 4; i++) {
-    initialFieldCards.push(randomCard());
+    const card: Card = randomCard();
+    initialFieldCards.push(card);
+    game.fieldCards[i].push(card);
   }
 
   //send 'game start' message with 6 different id
@@ -88,5 +96,22 @@ function gameStart(clients: Client[]) {
     };
     console.log(clients[i].player);
     clients[i].socket.emit("game event", gameStartEvent);
+  }
+}
+
+function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
+  const {player, card} = playCardEvent;
+  game.playedCardInfo.push({playerName: player.name, card});
+  
+  const foundPlayer =  game.players.find((e)=>e.id == player.id);
+  if (!foundPlayer) {
+    console.log("fk frontend");
+    return;
+  }
+  foundPlayer.cards = foundPlayer.cards.filter((e)=>e.number != card.number);
+  console.log(foundPlayer.cards);
+
+  if (game.playedCardInfo.length === game.players.length) {
+    
   }
 }

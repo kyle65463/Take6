@@ -4,7 +4,6 @@ import { Player } from "./player";
 export type PlayerEventType = "play card" | "select row";
 
 export interface PlayerEvent {
-  id: string;
   type: PlayerEventType;
 }
 
