@@ -12,7 +12,6 @@ export type ModeType =
  	| "none";
 
 export interface GameEvent {
-	id: string;
 	type: GameEventType;
 }
 
@@ -23,7 +22,7 @@ export interface UpdateGameStatusEvent extends GameEvent {
     mode: ModeType;
 
     // The list of players and the card they played for this round
-    playedCardInfo: { playerId: number; card: Card }[]; // minus one per round
+    playedCardInfo: { playerName: string; card: Card }[]; // minus one per round
 }
 
 
