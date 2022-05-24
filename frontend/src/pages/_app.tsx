@@ -42,7 +42,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 		(playerEvent: PlayerEvent) => {
 			// TODO: send the event to the server
 			if (socket) {
-				// socket.emit()
+				socket.emit('player event', playerEvent);
 			}
 		},
 		[socket]

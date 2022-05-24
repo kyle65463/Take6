@@ -8,6 +8,7 @@ import {
 	GameStartEvent,
 	StartCardSelectionEvent,
 	StartRowSelectionEvent,
+	UpdateGameStatusEvent,
 } from "@models/game_events";
 import { Player, randomPlayer, randomSelfPlayer, SelfPlayer } from "@models/player";
 import { PlayCardEvent, SelectRowEvent } from "@models/player_events";
@@ -35,6 +36,7 @@ export function useGame() {
 			otherPlayers,
 			fieldCards: [...initialFieldCards.map((card) => [card])],
 			playedCardInfo: [],
+			mode: "card selection",
 		});
 		setInCardSelectionMode(true);
 	}, []);
@@ -44,39 +46,119 @@ export function useGame() {
 		setWinners(winners);
 	}, []);
 
-	const onAppendRow = useCallback((appendRowEvent: AppendRowEvent) => {
-		const { playerName, card, rowIdx } = appendRowEvent;
-		setGame((oldGame) => {
-			if (oldGame) {
-				const newGame: Game = deepCopy(oldGame);
-				const { fieldCards, otherPlayers } = newGame;
-				if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
+	// const onAppendRow = useCallback((appendRowEvent: AppendRowEvent) => {
+	// 	const { playerName, card, rowIdx } = appendRowEvent;
+	// 	setGame((oldGame) => {
+	// 		if (oldGame) {
+	// 			const newGame: Game = deepCopy(oldGame);
+	// 			const { fieldCards, otherPlayers } = newGame;
+	// 			if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
 
-				// Check if the row is full
-				if (fieldCards[rowIdx].length >= 5) {
-					// The row is full, update player's score
-					const score = fieldCards[rowIdx].reduce((prev, cur) => prev + cur.score, 0);
-					const player = otherPlayers.find((player) => player.name === playerName);
-					if (player) {
-						player.score += score;
-					} else {
-						if (newGame.player.name === playerName) {
-							newGame.player.score += score;
-						} else throw "Player not found";
-					}
+	// 			// Check if the row is full
+	// 			if (fieldCards[rowIdx].length >= 5) {
+	// 				// The row is full, update player's score
+	// 				const score = fieldCards[rowIdx].reduce((prev, cur) => prev + cur.score, 0);
+	// 				const player = otherPlayers.find((player) => player.name === playerName);
+	// 				if (player) {
+	// 					player.score += score;
+	// 				} else {
+	// 					if (newGame.player.name === playerName) {
+	// 						newGame.player.score += score;
+	// 					} else throw "Player not found";
+	// 				}
 
-					// Clear the row
-					fieldCards[rowIdx] = [];
-				}
+	// 				// Clear the row
+	// 				fieldCards[rowIdx] = [];
+	// 			}
 
-				// Add the card to the target row
-				fieldCards[rowIdx].push(card);
+	// 			// Add the card to the target row
+	// 			fieldCards[rowIdx].push(card);
 
-				// Delete the leftmost played card, it should be as same as the variable "card"
-				newGame.playedCardInfo.shift();
-				return newGame;
-			}
+	// 			// Delete the leftmost played card, it should be as same as the variable "card"
+	// 			newGame.playedCardInfo.shift();
+	// 			return newGame;
+	// 		}
+	// 	});
+
+	// 	// ! Used for mocked server
+	// 	setTimeout(() => {
+	// 		setCnt((cnt) => cnt + 1);
+	// 	}, interval);
+	// }, []);
+
+	// const onClearRow = useCallback((clearRowEvent: ClearRowEvent) => {
+	// 	const { playerName, card, rowIdx } = clearRowEvent;
+	// 	setGame((oldGame) => {
+	// 		if (oldGame) {
+	// 			const newGame: Game = deepCopy(oldGame);
+	// 			const { fieldCards, otherPlayers } = newGame;
+	// 			if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
+
+	// 			// Update player's score
+	// 			const score = fieldCards[rowIdx].reduce((prev, cur) => prev + cur.score, 0);
+	// 			fieldCards[rowIdx] = [];
+	// 			const player = otherPlayers.find((player) => player.name === playerName);
+	// 			if (player) {
+	// 				player.score += score;
+	// 			} else {
+	// 				if (newGame.player.name === playerName) {
+	// 					newGame.player.score += score;
+	// 				} else throw "Player not found";
+	// 			}
+
+	// 			// Clear the row and add the card
+	// 			fieldCards[rowIdx] = [];
+	// 			fieldCards[rowIdx].push(card);
+
+	// 			// Delete the leftmost played card, it should be as same as the variable "card"
+	// 			newGame.playedCardInfo.shift();
+	// 			return newGame;
+	// 		}
+	// 	});
+
+	// 	// ! Used for mocked server
+	// 	setTimeout(() => {
+	// 		setCnt((cnt) => cnt + 1);
+	// 	}, interval);
+	// }, []);
+
+	// const onAllPlayerPlayed = useCallback((gameUpdateEvent: AllPlayerPlayedEvent) => {
+	// 	const { playedCardInfo } = gameUpdateEvent;
+	// 	playedCardInfo.sort((a, b) => a.card.number - b.card.number);
+	// 	setGame((oldGame) => {
+	// 		if (oldGame) {
+	// 			const newGame: Game = deepCopy(oldGame);
+	// 			newGame.playedCardInfo = playedCardInfo;
+	// 			return newGame;
+	// 		}
+	// 	});
+
+	// 	// ! Used for mocked server
+	// 	setTimeout(() => {
+	// 		setCnt((cnt) => cnt + 1);
+	// 	}, interval);
+	// }, []);
+
+	const onGameStatusUpdate = useCallback((gameUpdateEvent: UpdateGameStatusEvent) => {
+		const { player, otherPlayers, fieldCards, mode, playedCardInfo } = gameUpdateEvent;
+		setGame({
+			player,
+			otherPlayers,
+			fieldCards,
+			mode,
+			playedCardInfo,
 		});
+
+		switch(mode) {
+			case "card selection":
+				setInCardSelectionMode(true);
+				break;
+			case "row selection":
+				setInRowSelectionMode(true);
+				break;
+			case "none":
+				break;
+		}
 
 		// ! Used for mocked server
 		setTimeout(() => {
@@ -84,58 +166,8 @@ export function useGame() {
 		}, interval);
 	}, []);
 
-	const onClearRow = useCallback((clearRowEvent: ClearRowEvent) => {
-		const { playerName, card, rowIdx } = clearRowEvent;
-		setGame((oldGame) => {
-			if (oldGame) {
-				const newGame: Game = deepCopy(oldGame);
-				const { fieldCards, otherPlayers } = newGame;
-				if (rowIdx < 0 || rowIdx >= fieldCards.length) throw "Invalid row idx";
 
-				// Update player's score
-				const score = fieldCards[rowIdx].reduce((prev, cur) => prev + cur.score, 0);
-				fieldCards[rowIdx] = [];
-				const player = otherPlayers.find((player) => player.name === playerName);
-				if (player) {
-					player.score += score;
-				} else {
-					if (newGame.player.name === playerName) {
-						newGame.player.score += score;
-					} else throw "Player not found";
-				}
 
-				// Clear the row and add the card
-				fieldCards[rowIdx] = [];
-				fieldCards[rowIdx].push(card);
-
-				// Delete the leftmost played card, it should be as same as the variable "card"
-				newGame.playedCardInfo.shift();
-				return newGame;
-			}
-		});
-
-		// ! Used for mocked server
-		setTimeout(() => {
-			setCnt((cnt) => cnt + 1);
-		}, interval);
-	}, []);
-
-	const onAllPlayerPlayed = useCallback((gameUpdateEvent: AllPlayerPlayedEvent) => {
-		const { playedCardInfo } = gameUpdateEvent;
-		playedCardInfo.sort((a, b) => a.card.number - b.card.number);
-		setGame((oldGame) => {
-			if (oldGame) {
-				const newGame: Game = deepCopy(oldGame);
-				newGame.playedCardInfo = playedCardInfo;
-				return newGame;
-			}
-		});
-
-		// ! Used for mocked server
-		setTimeout(() => {
-			setCnt((cnt) => cnt + 1);
-		}, interval);
-	}, []);
 
 	// Listen for every game events
 	useEffect(() => {
@@ -152,20 +184,23 @@ export function useGame() {
 						case "game over":
 							onGameOver(gameEvent as GameOverEvent);
 							break;
-						case "all player played":
-							onAllPlayerPlayed(gameEvent as AllPlayerPlayedEvent);
-							break;
-						case "append row":
-							onAppendRow(gameEvent as AppendRowEvent);
-							break;
-						case "clear row":
-							onClearRow(gameEvent as ClearRowEvent);
-							break;
-						case "start row selection":
-							setInRowSelectionMode(true);
-							break;
-						case "start card selection":
-							setInCardSelectionMode(true);
+						// case "all player played":
+						// 	onAllPlayerPlayed(gameEvent as AllPlayerPlayedEvent);
+						// 	break;
+						// case "append row":
+						// 	onAppendRow(gameEvent as AppendRowEvent);
+						// 	break;
+						// case "clear row":
+						// 	onClearRow(gameEvent as ClearRowEvent);
+						//	break;
+						// case "start row selection":
+						// 	setInRowSelectionMode(true);
+						// 	break;
+						// case "start card selection":
+						// 	setInCardSelectionMode(true);
+						// 	break;
+						case "game status update":
+							onGameStatusUpdate(gameEvent as UpdateGameStatusEvent);
 							break;
 					}
 				}
@@ -190,14 +225,16 @@ export function useGame() {
 	// Invoked when the player click a row in row selection mode
 	const selectRow = useCallback(
 		(idx: number) => {
-			const selectRowEvent: SelectRowEvent = {
-				id: generateUid(),
-				type: "select row",
-				rowIdx: idx,
-			};
-			sendPlayerEvent(selectRowEvent);
-			setInRowSelectionMode(false);
-
+			if (game && game.playedCardInfo.length > 0) {
+				const selectRowEvent: SelectRowEvent = {
+					id: generateUid(),
+					type: "select row",
+					rowIdx: idx,
+					player: game.player,
+				};
+				sendPlayerEvent(selectRowEvent);
+				setInRowSelectionMode(false);
+			}
 			// ! Used for mocked server
 			if (game && game.playedCardInfo.length > 0) {
 				const clearRowEvent: ClearRowEvent = {
@@ -223,7 +260,8 @@ export function useGame() {
 				const playCardEvent: PlayCardEvent = {
 					id: generateUid(),
 					type: "play card",
-					// TODO: add the card information to event
+					player: game.player,
+					card: playedCard,
 				};
 				player.cards.splice(idx, 1);
 				sendPlayerEvent(playCardEvent);
