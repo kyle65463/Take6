@@ -1,3 +1,4 @@
+import { ChatEvent } from "@models/chat_events";
 import { GameEvent } from "@models/game_events";
 import { PlayerEvent } from "@models/player_events";
 import { initSocket } from "@services/socket";
@@ -11,6 +12,7 @@ import { Socket } from "socket.io-client";
 function MyApp({ Component, pageProps }: AppProps) {
 	const [socket, setSocket] = useState<Socket | undefined>();
 	const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
+	const [chatEvents, setChatEvents] = useState<ChatEvent[]>([]);
 
 	// Triggered when receiving new game event from server
 	const onGameEvent = useCallback((gameEvent: GameEvent) => {
@@ -20,8 +22,21 @@ function MyApp({ Component, pageProps }: AppProps) {
 		});
 	}, []);
 
+	// Triggered when receiving new chat event from server
+	const onChatEvent = useCallback((chatEvent: ChatEvent) => {
+		// Append the new event to the chatEvents array
+		setChatEvents((oldChatEvents) => {
+			return [...oldChatEvents, chatEvent];
+		});
+	}, []);
+
+
 	const clearGameEvents = useCallback(() => {
 		setGameEvents([]);
+	}, []);
+
+	const clearChatEvents = useCallback(() => {
+		setChatEvents([]);
 	}, []);
 
 	// Init the socket and add it to the socket context when connected
@@ -32,7 +47,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 				setSocket(newSocket);
 			};
 
-			initSocket({ onConnect, onGameEvent });
+			initSocket({ onConnect, onGameEvent, onChatEvent });
 		}
 	}, [socket]);
 
@@ -40,7 +55,6 @@ function MyApp({ Component, pageProps }: AppProps) {
 	// e.g. the player played a card
 	const sendPlayerEvent = useCallback(
 		(playerEvent: PlayerEvent) => {
-			// TODO: send the event to the server
 			if (socket) {
 				socket.emit('player event', playerEvent);
 			}
@@ -48,9 +62,20 @@ function MyApp({ Component, pageProps }: AppProps) {
 		[socket]
 	);
 
+	// Send the chat event to server
+	// e.g. the player send a message
+	const sendChatEvent = useCallback(
+		(chatEvent: ChatEvent) => {
+			if (socket) {
+				socket.emit('chat event', chatEvent);
+			}
+		},
+		[socket]
+	);
+
 	return (
 		<SocketContext.Provider value={{ socket, connectServer }}>
-			<EventsContext.Provider value={{ gameEvents, sendPlayerEvent, onGameEvent, clearGameEvents }}>
+			<EventsContext.Provider value={{ gameEvents, sendPlayerEvent, onGameEvent, clearGameEvents, chatEvents, sendChatEvent, onChatEvent, clearChatEvents}}>
 				<Head>
 					<title>Take6</title>
 					<link rel='icon' href='/favicon.ico' />

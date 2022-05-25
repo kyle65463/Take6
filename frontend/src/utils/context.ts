@@ -1,3 +1,4 @@
+import { ChatEvent } from "@models/chat_events";
 import { GameEvent } from "@models/game_events";
 import { PlayerEvent } from "@models/player_events";
 import { createContext } from "react";
@@ -17,6 +18,10 @@ interface EventsContextProps {
 	clearGameEvents: () => void;
 	sendPlayerEvent: (playerEvent: PlayerEvent) => void;
 	onGameEvent: (gameEvent: GameEvent) => void;
+	chatEvents: ChatEvent[];
+	clearChatEvents: () => void;
+	sendChatEvent: (chatEvent: ChatEvent) => void;
+	onChatEvent: (chatEvent: ChatEvent) => void;
 }
 
 export const EventsContext = createContext<EventsContextProps>({
@@ -24,4 +29,8 @@ export const EventsContext = createContext<EventsContextProps>({
 	sendPlayerEvent: (playerEvent: PlayerEvent) => {},
 	clearGameEvents: () => {},
 	onGameEvent: (gameEvent: GameEvent) => {},
+	chatEvents: [],
+	clearChatEvents: () => {},
+	sendChatEvent: (chatEvent: ChatEvent) => {},
+	onChatEvent: (chatEvent: ChatEvent) => {},
 });
