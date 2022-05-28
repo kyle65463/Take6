@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
-import { GameStartEvent, UpdateGameStatusEvent } from "./models/game_events";
+import { GameOverEvent, GameStartEvent, UpdateGameStatusEvent } from "./models/game_events";
 import {
   PlayCardEvent,
   PlayerEvent,
@@ -18,21 +18,13 @@ export const io = new Server(httpServer, {
   },
 });
 httpServer.listen(8888);
-// const socket: Socket = undefined;
-let socket: Socket | undefined = undefined;
-
-// variable for playerEvents queue
-export let playerEvents: PlayCardEvent[] = [];
-
-// variable for row selection
-let RowEvent: SelectRowEvent;
-let RowEventFlag: boolean;
 
 const game: Game = {
   clients: [],
   fieldCards: [[], [], [], []],
   mode: "none",
   playedCardInfo: [],
+  round: 0
 };
 
 // io handler: wait for connection
@@ -44,6 +36,7 @@ io.on("connection", (socket: Socket) => {
     cards: Array.from(Array(10).keys()).map(() => randomCard()),
     score: 0,
   };
+  player.cards.sort((a, b)=>a.number-b.number);
   const client: Client = {
     player: player,
     socket: socket,
@@ -58,8 +51,7 @@ io.on("connection", (socket: Socket) => {
         playerPlayedCard(game, playerEvent as PlayCardEvent);
         break;
       case "select row":
-        RowEvent = playerEvent as SelectRowEvent;
-        RowEventFlag = true;
+        playerSelectRow(game, playerEvent as SelectRowEvent);
         break;
     }
   });
@@ -68,6 +60,68 @@ io.on("connection", (socket: Socket) => {
     gameStart(game);
   }
 });
+
+async function playerSelectRow(game: Game, playCardEvent: SelectRowEvent){
+  const {player, rowIdx} = playCardEvent;
+  const { playedCardInfo, fieldCards, clients } = game;
+  game.round = 0;
+
+  const score = fieldCards[rowIdx].reduce(
+    (prev, cur) => prev + cur.score, 0
+  );
+  const foundClient = clients.find((e)=>e.player.id == player.id);
+  if (!foundClient) {
+    console.log("player not found!!");
+    return;
+  }
+  foundClient.player.score += score;
+  fieldCards[rowIdx] = [];
+  fieldCards[rowIdx].push(playedCardInfo[0].card);
+  playedCardInfo.shift();
+  updateGameStatus(game);
+  await delay(1000);
+
+  //continueing decideRow
+  let sz = playedCardInfo.length;
+  for (let i = 0; i < sz; i++) {
+    decideRow(game);
+    await delay(1000);
+    updateGameStatus(game);
+    if (game.selectRowPlayer) {
+      game.selectRowPlayer = undefined;
+      break;
+    }
+  }
+
+  //select winner
+  if(playedCardInfo.length == 0){
+    game.round++;
+    if(game.round == 10){
+      sendWinner(game);
+    } else {
+      game.mode = "card selection";
+      updateGameStatus(game);
+    }
+  }
+}
+
+function sendWinner(game: Game){
+  const {clients} = game;
+  clients.sort((a,b) => a.player.score - b.player.score);
+  //Todo: broadcast winner
+  const winners: Player[] = [];
+  for (const client of clients) {
+    winners.push(client.player);
+  }
+  console.log(winners);
+  const gameOverEvent: GameOverEvent = {
+    winners,
+    type: "game over"
+  };
+  for (const client of clients) {
+    client.socket.emit("game event", gameOverEvent);
+  }
+}
 
 function gameStart(game: Game) {
   //generate initial board
@@ -107,6 +161,9 @@ function getOtherPlayers(
 async function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
   const { player, card } = playCardEvent;
   game.playedCardInfo.push({ playerName: player.name, card });
+  // console.log(playCardEvent.player)
+  // console.log(game.playedCardInfo);
+  // console.log(game.clients[0].player, game.clients[1].player);
 
   const foundPlayer = game.clients.find(
     (e) => e.player.id == player.id
@@ -122,8 +179,8 @@ async function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
     game.playedCardInfo.sort((a, b) => a.card.number - b.card.number);
     updateGameStatus(game);
     for (let i = 0; i < game.clients.length; i++) {
-      decideRow(game);
       await delay(1000);
+      decideRow(game);
       updateGameStatus(game);
       if (game.selectRowPlayer) {
         game.selectRowPlayer = undefined;
@@ -131,6 +188,12 @@ async function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
       }
     }
   }
+}
+
+async function test(game: Game) {
+  decideRow(game);
+  await delay(1000);
+  updateGameStatus(game);
 }
 
 function delay(time: number) {
@@ -149,6 +212,7 @@ function updateGameStatus(game: Game) {
       playedCardInfo,
       type: "game status update",
     };
+    console.log(updateGameStatusEvent);
     socket.emit("game event", updateGameStatusEvent);
   }
 }
@@ -158,7 +222,7 @@ function decideRow(game: Game) {
 
   // Find the best match row for the leftmost played card
   const { playerName, card } = playedCardInfo[0];
-  console.log(game);
+  // console.log(game);
   const player = clients.find((client) => client.player.name === playerName)?.player;
   if (!player) {
     console.log("player not found");
@@ -185,9 +249,10 @@ function decideRow(game: Game) {
 
   if (bestMatchRowIdx === undefined || maxCardNumber === undefined) {
     game.selectRowPlayer = player;
+
   } else {
     fieldCards[bestMatchRowIdx].push(card);
-    if (fieldCards.length > 5) {
+    if (fieldCards[bestMatchRowIdx].length > 5) {
       // The row is full, update player's score
       const score = fieldCards[bestMatchRowIdx].reduce(
         (prev, cur) => prev + cur.score,
@@ -196,7 +261,19 @@ function decideRow(game: Game) {
       player.score += score;
       // Clear the row
       fieldCards[bestMatchRowIdx] = [];
+      fieldCards[bestMatchRowIdx].push(card);
     }
     playedCardInfo.shift();
+
+    //select winner
+    if(playedCardInfo.length == 0){
+      game.round++;
+      if(game.round == 10){
+        sendWinner(game);
+      } else {
+        game.mode = "card selection";
+        updateGameStatus(game);
+      }
+    }
   }
 }
