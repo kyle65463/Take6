@@ -30,6 +30,7 @@ const game: Game = {
 	mode: "none",
 	playedCardInfo: [],
 	round: 0,
+	playerReadyCount: 0,
 };
 
 // io handler: wait for connection
@@ -61,13 +62,12 @@ io.on("connection", (socket: Socket) => {
 			case "player info":
 				console.log(playerEvent);
 				playerSetName(game, playerEvent as PlayerInfoEvent, socket.id);
+				if (game.playerReadyCount == 2) {
+					gameStart(game);
+				}
 				break;
 		}
 	});
-
-	if (game.clients.length == 2) {
-		gameStart(game);
-	}
 });
 
 function playerSetName(
@@ -84,6 +84,7 @@ function playerSetName(
 		return;
 	}
 	foundClient.player.name = playerName;
+	game.playerReadyCount++;
 }
 
 async function playerSelectRow(game: Game, playCardEvent: SelectRowEvent) {
