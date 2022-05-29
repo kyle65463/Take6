@@ -4,7 +4,7 @@ import ChatPage from "@modules/chat_page/ChatPage";
 import DisplayCard from "@modules/game_page/DisplayCard";
 import { NameContext, SocketContext } from "@utils/context";
 import { useContext } from "react";
-import PlayerCard from "./PlayerCard";
+import PlayerInfo from "./PlayerInfo";
 import { useGame } from "./useGame";
 
 function GamePage() {
@@ -68,12 +68,13 @@ function GamePage() {
 							{/* Players info */}
 							<section>
 								{game.otherPlayers.map((player) => (
-									<PlayerCard player={player} />
+									<PlayerInfo player={player} />
 								))}
 							</section>
 						</div>
 					</div>
 
+					{/* Self info and Confirm button */}
 					<section className='mt-12'>
 						<div className='px-16 w-full flex justify-between items-end mb-4'>
 							<p>
