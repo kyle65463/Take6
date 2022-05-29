@@ -14,6 +14,7 @@ import {
 import { Card, randomCard } from "./models/card";
 import { Player, Client } from "./models/player";
 import { Game } from "./models/game";
+import { ChatEvent } from "./models/chat_events";
 
 const httpServer = createServer();
 export const io = new Server(httpServer, {
@@ -67,6 +68,10 @@ io.on("connection", (socket: Socket) => {
 				}
 				break;
 		}
+	});
+	socket.on("chat event", (playerEvent: ChatEvent) => {
+		console.log("event: ", playerEvent);
+		io.sockets.emit("chat event", playerEvent);
 	});
 });
 

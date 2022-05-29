@@ -3,7 +3,7 @@ import { GameEvent } from "@models/game_events";
 import { PlayerEvent } from "@models/player_events";
 import { initSocket } from "@services/socket";
 import "@styles/globals.css";
-import { EventsContext, SocketContext } from "@utils/context";
+import { EventsContext, NameContext, SocketContext } from "@utils/context";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { useCallback, useState } from "react";
@@ -13,6 +13,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 	const [socket, setSocket] = useState<Socket | undefined>();
 	const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
 	const [chatEvents, setChatEvents] = useState<ChatEvent[]>([]);
+	const [name, setName] = useState<string>("");
 
 	// Triggered when receiving new game event from server
 	const onGameEvent = useCallback((gameEvent: GameEvent) => {
@@ -75,29 +76,38 @@ function MyApp({ Component, pageProps }: AppProps) {
 		[socket]
 	);
 
+	const onSetName = useCallback(
+		(name: string) => {
+			setName(name);
+		},
+		[name]
+	);
+
 	return (
-		<SocketContext.Provider value={{ socket, connectServer }}>
-			<EventsContext.Provider
-				value={{
-					gameEvents,
-					sendPlayerEvent,
-					onGameEvent,
-					clearGameEvents,
-					chatEvents,
-					sendChatEvent,
-					onChatEvent,
-					clearChatEvents,
-				}}
-			>
-				<Head>
-					<title>Take6</title>
-					<link rel='icon' href='/favicon.ico' />
-				</Head>
-				<div className='bg-base-200 min-h-screen'>
-					<Component {...pageProps} />
-				</div>
-			</EventsContext.Provider>
-		</SocketContext.Provider>
+		<NameContext.Provider value={{ name, onSetName }}>
+			<SocketContext.Provider value={{ socket, connectServer }}>
+				<EventsContext.Provider
+					value={{
+						gameEvents,
+						sendPlayerEvent,
+						onGameEvent,
+						clearGameEvents,
+						chatEvents,
+						sendChatEvent,
+						onChatEvent,
+						clearChatEvents,
+					}}
+				>
+					<Head>
+						<title>Take6</title>
+						<link rel='icon' href='/favicon.ico' />
+					</Head>
+					<div className='bg-base-200 min-h-screen'>
+						<Component {...pageProps} />
+					</div>
+				</EventsContext.Provider>
+			</SocketContext.Provider>
+		</NameContext.Provider>
 	);
 }
 

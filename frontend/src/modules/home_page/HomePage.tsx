@@ -1,11 +1,12 @@
 import Button from "@common/components/Button";
-import { SocketContext } from "@utils/context";
+import { NameContext, SocketContext } from "@utils/context";
 import Link from "next/link";
 import { useContext, useRef } from "react";
 
 function HomePage() {
 	const { connectServer } = useContext(SocketContext);
 	const nameRef = useRef<HTMLInputElement | null>(null);
+	const { onSetName } = useContext(NameContext);
 
 	return (
 		<div className='layout'>
@@ -16,9 +17,10 @@ function HomePage() {
 				<Link href='/play'>
 					<Button
 						style='primary'
-						onClick={() =>
-							connectServer(nameRef.current?.value ?? "")
-						}
+						onClick={() => {
+							connectServer(nameRef.current?.value ?? "");
+							onSetName(nameRef.current?.value ?? "");
+						}}
 					>
 						Play
 					</Button>
