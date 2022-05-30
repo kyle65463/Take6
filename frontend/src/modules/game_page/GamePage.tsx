@@ -59,7 +59,7 @@ function GamePage() {
 							<section className='flex mr-16'>
 								{playedCardInfo?.map(({ playerName, card }) => (
 									<div className=''>
-										<p className='mb-2'>{playerName}</p>
+										<p className='font-bold pl-2 mb-2'>{playerName}</p>
 										<DisplayCard size='sm' card={card} />
 									</div>
 								))}
@@ -70,12 +70,14 @@ function GamePage() {
 								{game.otherPlayers.map((player) => (
 									<PlayerInfo player={player} />
 								))}
+								<ChatPage />
 							</section>
+							
 						</div>
 					</div>
 
 					{/* Self info and Confirm button */}
-					<section className='mt-12'>
+					<section className='mt-6'>
 						<div className='px-16 w-full flex justify-between items-end mb-4'>
 							<p>
 								<span className='text-xl font-bold mr-4'>
@@ -137,7 +139,6 @@ function GamePage() {
 					</section>
 				</main>
 			)}
-			<ChatPage />
 		</div>
 	);
 }

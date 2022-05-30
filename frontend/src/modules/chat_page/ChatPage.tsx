@@ -1,3 +1,4 @@
+import Button from "@common/components/Button";
 import { ChatEvent } from "@models/chat_events";
 import { EventsContext, NameContext, SocketContext } from "@utils/context";
 import { generateUid } from "@utils/utils";
@@ -27,14 +28,14 @@ export default function ChatPage() {
 
 	return (
 		<main className='flex-1 flex flex-col justify-between mb-12'>
-			<div className='flex justify-between'>
-				<div className='flex items-center mt-16'>
-					{/* Chat room */}
-					<ul id='messages'></ul>
-					<ChatList chats={chatList} />
-					<input ref={messageRef} type='text' />
-					<button onClick={messageSend}>Send</button>
-				</div>
+			<div className='mt-3 pl-3 pt-1 bg-emerald-200/30 rounded-lg box-border h-80 w-44 border-4 border-emerald-400 overflow-auto'>
+				{/* Chat room */}
+				<ul id='messages'></ul>
+				<ChatList chats={chatList} />
+			</div>
+			<div className="mt-2">
+				<input className='mr-2' ref={messageRef} type='text'/>
+				<Button style='primary' onClick={messageSend}>Send</Button>					
 			</div>
 		</main>
 	);

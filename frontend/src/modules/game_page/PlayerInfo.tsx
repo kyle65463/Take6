@@ -8,7 +8,7 @@ interface PlayerCardProps {
 function PlayerInfo({ player }: PlayerCardProps) {
 	const { name, score } = player;
 	return (
-		<div className='mb-8'>
+		<div className='mb-4'>
 			<p className='font-bold mb-0.5'>{name}</p>
 			<p className={clsx("text-sm text-gray-600")}>Score: {score}</p>
 		</div>
