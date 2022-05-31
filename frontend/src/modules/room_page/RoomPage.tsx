@@ -38,15 +38,19 @@ function RoomPage() {
 					<div className='mb-6'>
 						<p>Other players:</p>
 						{otherPlayers.map((player) => (
-							<p>
-								{player.name} <span className="text-gray-400"> {player.isReady ? "ready" : "not ready"}</span>
+							<p className='my-2'>
+								<img src={player.photoURL} alt='' className='w-12 h-12 mr-2 avatar mask mask-circle' />
+								<span className='mr-2 text-lg'>{player.name}</span>
+								<span className='text-gray-400'> {player.isReady ? "ready" : "not ready"}</span>
 							</p>
 						))}
 					</div>
 					<div>
 						<p>You: </p>
-						<p>
-							{player.name} <span className="text-gray-400"> {player.isReady ? "ready" : "not ready"}</span>
+						<p className='mb-4 mt-2'>
+							<img src={player.photoURL} alt='' className='w-12 h-12 mr-2 avatar mask mask-circle' />
+							<span className='mr-2 text-lg'>{player.name}</span>
+							<span className='text-gray-400'> {player.isReady ? "ready" : "not ready"}</span>
 						</p>
 						<Button
 							style={player.isReady ? "disabled" : "primary"}
