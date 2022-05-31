@@ -34,17 +34,11 @@ function GamePage() {
 								<div className='flex items-center'>
 									<>
 										{row.map((card) => (
-											<DisplayCard
-												size='sm'
-												card={card}
-											/>
+											<DisplayCard size='sm' card={card} />
 										))}
 										{inRowSelectionMode && (
 											<div className='ml-8'>
-												<Button
-													style='primary'
-													onClick={() => selectRow(i)}
-												>
+												<Button style='primary' onClick={() => selectRow(i)}>
 													Clear
 												</Button>
 											</div>
@@ -59,19 +53,17 @@ function GamePage() {
 							<section className='flex mr-16'>
 								{playedCardInfo?.map(({ playerName, card }) => (
 									<div className=''>
-										<p className='font-bold pl-2 mb-2'>
-											{playerName}
-										</p>
+										<p className='font-bold pl-2 mb-2'>{playerName}</p>
 										<DisplayCard size='sm' card={card} />
 									</div>
 								))}
 							</section>
 
 							{/* Players info */}
-							<section>
+							<section className='flex flex-col items-end'>
 								<div className='flex'>
 									{game.otherPlayers.map((player) => (
-										<div className='mr-6'>
+										<div className='ml-6'>
 											<PlayerInfo player={player} />
 										</div>
 									))}
@@ -85,18 +77,11 @@ function GamePage() {
 					<section className='mt-6'>
 						<div className='px-16 w-full flex justify-between items-end mb-4'>
 							<p>
-								<span className='text-xl font-bold mr-4'>
-									{game.player.name}
-								</span>
-								<span className='text-gray-600'>
-									Score: {game.player.score}
-								</span>
+								<span className='text-xl font-bold mr-4'>{game.player.name}</span>
+								<span className='text-gray-600'>Score: {game.player.score}</span>
 							</p>
 							{selectedHandCardId !== undefined ? (
-								<Button
-									style='primary'
-									onClick={() => playCard(selectedHandCardId)}
-								>
+								<Button style='primary' onClick={() => playCard(selectedHandCardId)}>
 									Confirm
 								</Button>
 							) : (
@@ -107,11 +92,7 @@ function GamePage() {
 						<div className='flex justify-center'>
 							{game.player.cards.map((card, i) => (
 								<DisplayCard
-									onClick={
-										inCardSelectionMode
-											? () => selectHandCard(i)
-											: undefined
-									}
+									onClick={inCardSelectionMode ? () => selectHandCard(i) : undefined}
 									card={card}
 									selected={i === selectedHandCardId}
 									disabled={!inCardSelectionMode}
@@ -128,9 +109,9 @@ function GamePage() {
 								location.reload();
 							}}
 						>
-							<div className='relative overflow-y-auto shadow-md'>
-								<table className='w-full text-sm text-left text-gray-500 dark:text-gray-400'>
-									<thead className='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
+							<div className='relative overflow-y-auto'>
+								<table className='w-full text-lg text-left text-gray-500 '>
+									<thead className='text-gray-700 uppercase'>
 										<tr>
 											<th>Rank</th>
 											<th>Name</th>
@@ -138,15 +119,13 @@ function GamePage() {
 										</tr>
 									</thead>
 									<tbody>
-										{winners?.map(
-											({ name, score }, index) => (
-												<tr className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'>
-													<td>{index + 1}</td>
-													<td>{name}</td>
-													<td>{score}</td>
-												</tr>
-											)
-										)}
+										{winners?.map(({ name, score }, index) => (
+											<tr className='bg-white py-2'>
+												<td>{index + 1}</td>
+												<td>{name}</td>
+												<td>{score}</td>
+											</tr>
+										))}
 									</tbody>
 								</table>
 							</div>
