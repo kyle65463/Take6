@@ -273,10 +273,7 @@ function getOtherPlayers(clients: Client[], player: Player): Omit<Player, "cards
 
 async function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
 	const { player, card } = playCardEvent;
-	game.playedCardInfo.push({ playerName: player.name, card });
-	// console.log(playCardEvent.player)
-	// console.log(game.playedCardInfo);
-	// console.log(game.clients[0].player, game.clients[1].player);
+	game.playedCardInfo.push({ playerName: player.name, card, playerId: player.id });
 
 	const foundPlayer = game.clients.find((e) => e.player.id == player.id)?.player;
 	if (!foundPlayer) {
@@ -284,7 +281,6 @@ async function playerPlayedCard(game: Game, playCardEvent: PlayCardEvent) {
 		return;
 	}
 	foundPlayer.cards = foundPlayer.cards.filter((e) => e.number != card.number);
-	// console.log(foundPlayer.cards);
 
 	if (game.playedCardInfo.length === game.clients.length) {
 		game.playedCardInfo.sort((a, b) => a.card.number - b.card.number);
@@ -327,9 +323,8 @@ function decideRow(game: Game) {
 	const { playedCardInfo, fieldCards, clients } = game;
 
 	// Find the best match row for the leftmost played card
-	const { playerName, card } = playedCardInfo[0];
-	// console.log(game);
-	const player = clients.find((client) => client.player.name === playerName)?.player;
+	const { playerId, card } = playedCardInfo[0];
+	const player = clients.find((client) => client.player.id === playerId)?.player;
 	if (!player) {
 		console.log("player not found");
 		return;
