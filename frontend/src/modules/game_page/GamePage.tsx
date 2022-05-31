@@ -2,7 +2,8 @@ import Button from "@common/components/Button";
 import Modal from "@common/components/Modal";
 import ChatPage from "@modules/chat_page/ChatPage";
 import DisplayCard from "@modules/game_page/DisplayCard";
-import { SocketContext } from "@utils/context";
+import { SocketContext, UserContext } from "@utils/context";
+import { useRouter } from "next/router";
 import { useContext } from "react";
 import PlayerInfo from "./PlayerInfo";
 import { useGame } from "./useGame";
@@ -19,8 +20,10 @@ function GamePage() {
 		selectHandCard,
 		playCard,
 	} = useGame();
-	const { socket } = useContext(SocketContext);
+	const { socket, clearSocket } = useContext(SocketContext);
+	const { clearRoom } = useContext(UserContext);
 	const connecting = socket === undefined;
+	const router = useRouter();
 
 	return (
 		<div className='layout'>
@@ -104,10 +107,14 @@ function GamePage() {
 						<Modal
 							title='Game Over'
 							buttonText='Play again'
-							isShow={winners !== undefined}
-							closeModal={() => {
-								location.reload();
+							onConfirm={() => {
+								clearRoom();
+								socket?.disconnect();
+								clearSocket();
+								router.push("/");
 							}}
+							isShow={winners !== undefined}
+							closeModal={() => {}}
 						>
 							<div className='relative overflow-y-auto'>
 								<table className='w-full text-lg text-left text-gray-500 '>

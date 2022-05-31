@@ -55,6 +55,14 @@ function MyApp({ Component, pageProps }: AppProps) {
 		setChatEvents([]);
 	}, []);
 
+	const clearRoom = useCallback(() => {
+		setRoom(undefined);
+	}, []);
+
+	const clearSocket = useCallback(() => {
+		setSocket(undefined);
+	}, []);
+
 	// Init the socket and add it to the socket context when connected
 	// Note: only update the state when the socket is connected
 	const connectServer = useCallback(
@@ -69,7 +77,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 					onChatEvent,
 					onRoomEvent,
 					name: user.displayName ?? "no name",
-					photoURL: user.photoURL ?? '',
+					photoURL: user.photoURL ?? "",
 					roomId,
 				});
 			}
@@ -100,8 +108,10 @@ function MyApp({ Component, pageProps }: AppProps) {
 	);
 
 	return (
-		<UserContext.Provider value={{ room, user }}>
-			<SocketContext.Provider value={{ socket, connectServer }}>
+		<UserContext.Provider value={{ room, user, clearRoom }}>
+			<SocketContext.Provider
+				value={{ socket, connectServer, clearSocket }}
+			>
 				<EventsContext.Provider
 					value={{
 						gameEvents,

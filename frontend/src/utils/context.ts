@@ -9,10 +9,12 @@ import { Socket } from "socket.io-client";
 interface SocketContextProps {
 	socket?: Socket;
 	connectServer: (user: User, roomId?: string) => void;
+	clearSocket: () => void;
 }
 
 export const SocketContext = createContext<SocketContextProps>({
 	connectServer: () => {},
+	clearSocket: () => {},
 });
 
 interface EventsContextProps {
@@ -40,8 +42,10 @@ export const EventsContext = createContext<EventsContextProps>({
 interface UserContextProps {
 	user?: User | null;
 	room?: Room;
+	clearRoom: () => void;
 }
 
 export const UserContext = createContext<UserContextProps>({
 	user: null,
+	clearRoom: () => {},
 });
