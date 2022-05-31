@@ -117,12 +117,17 @@ function addNewPlayer(games: Games, playerInfoEvent: PlayerInfoEvent, socketId: 
 		player,
 		socket,
 	};
-	game.clients.push(client);
+	const clients = game.clients;
+	clients.push(client);
 
 	// Send room event to all players in the same game
-	for (const client of game.clients) {
+	for (const client of clients) {
+		const player = clients.find((client) => client.player.id === socketId)?.player;
+		if(!player) return; // Should not happen
+		const otherPlayers = getOtherPlayers(clients, player);
 		const roomEvent: RoomEvent = {
-			player: game.clients.map((client) => client.player),
+			player,
+			otherPlayers,
 			roomId,
 		};
 		console.log(roomEvent);
