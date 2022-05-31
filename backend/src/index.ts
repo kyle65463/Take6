@@ -96,12 +96,8 @@ function addNewPlayer(games: Games, playerInfoEvent: PlayerInfoEvent, socketId: 
 		games[roomId] = newGame();
 		game = games[roomId]; 
 	}
-	console.log('abc');
-	console.log(game)
-	console.log(roomId)
 	if (!game) return; // Should not happen
 	if (!roomId) return; // Should not happen
-	console.log('def');
 
 	// Add the player to the game
 	const player: Player = {
