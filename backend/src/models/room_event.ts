@@ -1,11 +1,7 @@
 import { Player } from "./player";
 
-export interface RoomPlayer extends Omit<Player, "cards"> {
-	isReady: boolean;
-}
-
 export interface RoomEvent {
 	roomId: string;
-	player: RoomPlayer;
-	otherPlayers: RoomPlayer[];
+	player: Omit<Player, "cards">;
+	otherPlayers: Omit<Player, "cards">[];
 }

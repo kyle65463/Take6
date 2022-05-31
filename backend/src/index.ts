@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import { GameOverEvent, GameStartEvent, UpdateGameStatusEvent } from "./models/game_events";
-import { PlayCardEvent, PlayerEvent, PlayerInfoEvent, SelectRowEvent } from "./models/player_events";
+import { PlayCardEvent, PlayerEvent, PlayerInfoEvent, PlayerReadyEvent, SelectRowEvent } from "./models/player_events";
 import { Card, randomCard } from "./models/card";
 import { Player, Client } from "./models/player";
 import { Game, Games } from "./models/game";
@@ -39,7 +39,7 @@ function newGame(): Game {
 }
 
 const games: Games = {};
-const sockets: Socket[] = [];
+const rawClients: { socket: Socket; roomId?: string }[] = [];
 
 io.on("connection", (socket: Socket) => {
 	console.log("connected");
@@ -48,8 +48,9 @@ io.on("connection", (socket: Socket) => {
 		name: socket.id, // TODO: name?
 		cards: Array.from(Array(10).keys()).map(() => randomCard()),
 		score: 0,
+		isReady: false,
 	};
-	sockets.push(socket);
+	rawClients.push({ socket });
 	player.cards.sort((a, b) => a.number - b.number);
 	const client: Client = {
 		player: player,
@@ -68,11 +69,16 @@ io.on("connection", (socket: Socket) => {
 				playerSelectRow(game, playerEvent as SelectRowEvent);
 				break;
 			case "player info":
-				addNewPlayer(games, playerEvent as PlayerInfoEvent, socket.id, sockets);
-				if (game.playerReadyCount == 2) {
-					gameStart(game);
-				}
+				addNewPlayer(games, playerEvent as PlayerInfoEvent, socket.id, rawClients);
 				break;
+			case "player ready": {
+				const roomId = rawClients.find((client) => client.socket.id === socket.id)?.roomId;
+				if (!roomId) return;
+				const game = games[roomId];
+				if (!game) return;
+				playerReady(game, socket.id, roomId);
+				break;
+			}
 		}
 	});
 	socket.on("chat event", (playerEvent: ChatEvent) => {
@@ -81,7 +87,20 @@ io.on("connection", (socket: Socket) => {
 	});
 });
 
-function addNewPlayer(games: Games, playerInfoEvent: PlayerInfoEvent, socketId: string, sockets: Socket[]) {
+function findGame(games: Games, rawClients: { socket: Socket; roomId?: string }[], socketId: string) {
+	const roomId = rawClients.find((socket) => socket.socket.id === socketId)?.roomId;
+	if (!roomId) return;
+	const game = games[roomId];
+	if (!game) return;
+	return games[roomId];
+}
+
+function addNewPlayer(
+	games: Games,
+	playerInfoEvent: PlayerInfoEvent,
+	socketId: string,
+	rawClients: { socket: Socket; roomId?: string }[]
+) {
 	let { playerName, roomId } = playerInfoEvent;
 	let game: Game | undefined;
 	if (roomId) {
@@ -94,7 +113,7 @@ function addNewPlayer(games: Games, playerInfoEvent: PlayerInfoEvent, socketId: 
 			roomId = getRandomInt(1000, 10000).toString();
 		}
 		games[roomId] = newGame();
-		game = games[roomId]; 
+		game = games[roomId];
 	}
 	if (!game) return; // Should not happen
 	if (!roomId) return; // Should not happen
@@ -105,9 +124,10 @@ function addNewPlayer(games: Games, playerInfoEvent: PlayerInfoEvent, socketId: 
 		name: playerName,
 		cards: Array.from(Array(10).keys()).map(() => randomCard()),
 		score: 0,
+		isReady: false,
 	};
 	player.cards.sort((a, b) => a.number - b.number);
-	const socket = sockets.find((socket) => socket.id === socketId);
+	const socket = rawClients.find((socket) => socket.socket.id === socketId)?.socket;
 	if (!socket) return; // Should not happen
 	const client: Client = {
 		player,
@@ -119,7 +139,27 @@ function addNewPlayer(games: Games, playerInfoEvent: PlayerInfoEvent, socketId: 
 	// Send room event to all players in the same game
 	for (const client of clients) {
 		const player = client.player;
-		if(!player) return; // Should not happen
+		if (!player) return; // Should not happen
+		const otherPlayers = getOtherPlayers(clients, player);
+		const roomEvent: RoomEvent = {
+			player,
+			otherPlayers,
+			roomId,
+		};
+		console.log(roomEvent);
+		client.socket.emit("room event", roomEvent);
+	}
+}
+
+function playerReady(game: Game, socketId: string, roomId: string) {
+	// Send room event to all players in the same game
+	const clients = game.clients;
+	const readyPlayer = game.clients.find((client) => client.socket.id === socketId)?.player;
+	if (!readyPlayer) return; // Should not happen
+	readyPlayer.isReady = true;
+	for (const client of clients) {
+		const player = client.player;
+		if (!player) return; // Should not happen
 		const otherPlayers = getOtherPlayers(clients, player);
 		const roomEvent: RoomEvent = {
 			player,
@@ -223,7 +263,7 @@ function gameStart(game: Game) {
 function getOtherPlayers(clients: Client[], player: Player): Omit<Player, "cards">[] {
 	const otherPlayers: Omit<Player, "cards">[] = clients
 		.filter((client) => client.player.id != player.id)
-		.map(({ player: { id, score, name } }) => ({ id, score, name }));
+		.map(({ player: { id, score, name, isReady } }) => ({ id, score, name, isReady }));
 	return otherPlayers;
 }
 

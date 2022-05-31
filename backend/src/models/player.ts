@@ -6,6 +6,7 @@ export interface Player {
   name: string;
   cards: Card[];
   score: number;
+  isReady: boolean;
 }
 
 export interface Client {
