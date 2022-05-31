@@ -31,46 +31,58 @@ function newGame(): Game {
 }
 
 const games: Games = {};
-const rawClients: { socket: Socket; roomId?: string }[] = [];
+let rawClients: { socket: Socket; roomId?: string }[] = [];
+
+io.on("disconnect", (socket) => {
+	try {
+		rawClients = rawClients.filter((client) => client.socket.id !== socket.id);
+	} catch (e) {}
+});
 
 io.on("connection", (socket: Socket) => {
-	console.log("connected");
-	rawClients.push({ socket });
+	try {
+		console.log("connected");
+		rawClients.push({ socket });
+	} catch (e) {}
 
 	socket.on("player event", (playerEvent: PlayerEvent) => {
-		console.log("event: ", playerEvent.type);
-		switch (playerEvent.type) {
-			case "play card": {
-				const game = findGame(games, rawClients, socket.id);
-				if (!game) return;
-				playerPlayedCard(game, playerEvent as PlayCardEvent);
-				break;
+		try {
+			console.log("event: ", playerEvent.type);
+			switch (playerEvent.type) {
+				case "play card": {
+					const game = findGame(games, rawClients, socket.id);
+					if (!game) return;
+					playerPlayedCard(game, playerEvent as PlayCardEvent);
+					break;
+				}
+				case "select row": {
+					const game = findGame(games, rawClients, socket.id);
+					if (!game) return;
+					playerSelectRow(game, playerEvent as SelectRowEvent);
+					break;
+				}
+				case "player info":
+					addNewPlayer(games, playerEvent as PlayerInfoEvent, socket.id, rawClients);
+					break;
+				case "player ready": {
+					const roomId = rawClients.find((client) => client.socket.id === socket.id)?.roomId;
+					if (!roomId) return;
+					const game = games[roomId];
+					if (!game) return;
+					playerReady(game, socket.id, roomId);
+					break;
+				}
 			}
-			case "select row": {
-				const game = findGame(games, rawClients, socket.id);
-				if (!game) return;
-				playerSelectRow(game, playerEvent as SelectRowEvent);
-				break;
-			}
-			case "player info":
-				addNewPlayer(games, playerEvent as PlayerInfoEvent, socket.id, rawClients);
-				break;
-			case "player ready": {
-				const roomId = rawClients.find((client) => client.socket.id === socket.id)?.roomId;
-				if (!roomId) return;
-				const game = games[roomId];
-				if (!game) return;
-				playerReady(game, socket.id, roomId);
-				break;
-			}
-		}
+		} catch (e) {}
 	});
 	socket.on("chat event", (chatEvent: ChatEvent) => {
-		const game = findGame(games, rawClients, socket.id);
-		if (!game) return;
-		for (const client of game.clients) {
-			client.socket.emit("chat event", chatEvent);
-		}
+		try {
+			const game = findGame(games, rawClients, socket.id);
+			if (!game) return;
+			for (const client of game.clients) {
+				client.socket.emit("chat event", chatEvent);
+			}
+		} catch (e) {}
 	});
 });
 
@@ -104,6 +116,7 @@ function addNewPlayer(
 	}
 	if (!game) return; // Should not happen
 	if (!roomId) return; // Should not happen
+	if (game.clients.length >= 6) return;
 
 	// Add the player to the game
 	const player: Player = {
@@ -211,12 +224,10 @@ async function playerSelectRow(game: Game, playCardEvent: SelectRowEvent) {
 function sendWinner(game: Game) {
 	const { clients } = game;
 	clients.sort((a, b) => a.player.score - b.player.score);
-	//Todo: broadcast winner
 	const winners: Player[] = [];
 	for (const client of clients) {
 		winners.push(client.player);
 	}
-	console.log(winners);
 	const gameOverEvent: GameOverEvent = {
 		winners,
 		type: "game over",
