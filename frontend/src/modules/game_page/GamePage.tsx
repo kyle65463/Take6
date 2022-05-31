@@ -51,9 +51,9 @@ function GamePage() {
 							))}
 						</section>
 
-						<div className='flex items-center mt-16'>
+						<div className='flex mt-16'>
 							{/* Played cards */}
-							<section className='flex mr-16'>
+							<section className='flex mr-16 mt-12'>
 								{playedCardInfo?.map(({ playerName, card }) => (
 									<div className=''>
 										<p className='font-bold pl-2 mb-2'>{playerName}</p>
@@ -71,6 +71,7 @@ function GamePage() {
 										</div>
 									))}
 								</div>
+								{/* Chat room */}
 								<ChatPage />
 							</section>
 						</div>
