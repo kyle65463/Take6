@@ -34,11 +34,17 @@ function GamePage() {
 								<div className='flex items-center'>
 									<>
 										{row.map((card) => (
-											<DisplayCard size='sm' card={card} />
+											<DisplayCard
+												size='sm'
+												card={card}
+											/>
 										))}
 										{inRowSelectionMode && (
 											<div className='ml-8'>
-												<Button style='primary' onClick={() => selectRow(i)}>
+												<Button
+													style='primary'
+													onClick={() => selectRow(i)}
+												>
 													Clear
 												</Button>
 											</div>
@@ -53,7 +59,9 @@ function GamePage() {
 							<section className='flex mr-16'>
 								{playedCardInfo?.map(({ playerName, card }) => (
 									<div className=''>
-										<p className='font-bold pl-2 mb-2'>{playerName}</p>
+										<p className='font-bold pl-2 mb-2'>
+											{playerName}
+										</p>
 										<DisplayCard size='sm' card={card} />
 									</div>
 								))}
@@ -63,7 +71,7 @@ function GamePage() {
 							<section>
 								<div className='flex'>
 									{game.otherPlayers.map((player) => (
-										<div className="mr-6">
+										<div className='mr-6'>
 											<PlayerInfo player={player} />
 										</div>
 									))}
@@ -77,11 +85,18 @@ function GamePage() {
 					<section className='mt-6'>
 						<div className='px-16 w-full flex justify-between items-end mb-4'>
 							<p>
-								<span className='text-xl font-bold mr-4'>{game.player.name}</span>
-								<span className='text-gray-600'>Score: {game.player.score}</span>
+								<span className='text-xl font-bold mr-4'>
+									{game.player.name}
+								</span>
+								<span className='text-gray-600'>
+									Score: {game.player.score}
+								</span>
 							</p>
 							{selectedHandCardId !== undefined ? (
-								<Button style='primary' onClick={() => playCard(selectedHandCardId)}>
+								<Button
+									style='primary'
+									onClick={() => playCard(selectedHandCardId)}
+								>
 									Confirm
 								</Button>
 							) : (
@@ -92,7 +107,11 @@ function GamePage() {
 						<div className='flex justify-center'>
 							{game.player.cards.map((card, i) => (
 								<DisplayCard
-									onClick={inCardSelectionMode ? () => selectHandCard(i) : undefined}
+									onClick={
+										inCardSelectionMode
+											? () => selectHandCard(i)
+											: undefined
+									}
 									card={card}
 									selected={i === selectedHandCardId}
 									disabled={!inCardSelectionMode}
@@ -109,15 +128,27 @@ function GamePage() {
 								location.reload();
 							}}
 						>
-							<div>
-								<p>The game is over, the ranking is:</p>
-								<div className='mt-10 mb-6'>
-									{winners?.map(({ name }) => (
-										<div className='flex justify-center items-end my-6'>
-											<span className='text-3xl font-bold'>{name}</span>
-										</div>
-									))}
-								</div>
+							<div className='relative overflow-y-auto shadow-md'>
+								<table className='w-full text-sm text-left text-gray-500 dark:text-gray-400'>
+									<thead className='text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400'>
+										<tr>
+											<th>Rank</th>
+											<th>Name</th>
+											<th>Score</th>
+										</tr>
+									</thead>
+									<tbody>
+										{winners?.map(
+											({ name, score }, index) => (
+												<tr className='bg-white border-b dark:bg-gray-800 dark:border-gray-700'>
+													<td>{index + 1}</td>
+													<td>{name}</td>
+													<td>{score}</td>
+												</tr>
+											)
+										)}
+									</tbody>
+								</table>
 							</div>
 						</Modal>
 					</section>
