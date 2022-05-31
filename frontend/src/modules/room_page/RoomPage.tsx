@@ -26,7 +26,11 @@ function RoomPage() {
 				<p>Room number:</p>
 				<p>{roomId}</p>
 			</div>
-			<div>{otherPlayers.map((player) => player.name)}</div>
+			<div>
+				{otherPlayers.map((player) => (
+					<p>{player.name}</p>
+				))}
+			</div>
 			<div>You: {player.name}</div>
 		</div>
 	);

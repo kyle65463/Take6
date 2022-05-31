@@ -118,7 +118,7 @@ function addNewPlayer(games: Games, playerInfoEvent: PlayerInfoEvent, socketId: 
 
 	// Send room event to all players in the same game
 	for (const client of clients) {
-		const player = clients.find((client) => client.player.id === socketId)?.player;
+		const player = client.player;
 		if(!player) return; // Should not happen
 		const otherPlayers = getOtherPlayers(clients, player);
 		const roomEvent: RoomEvent = {
