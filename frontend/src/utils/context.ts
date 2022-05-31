@@ -36,13 +36,13 @@ export const EventsContext = createContext<EventsContextProps>({
 	onChatEvent: (chatEvent: ChatEvent) => {},
 });
 
-interface NameContextProps {
+interface UserContextProps {
 	name: string;
 	room?: Room;
 	onSetName: (name: string) => void;
 }
 
-export const NameContext = createContext<NameContextProps>({
+export const UserContext = createContext<UserContextProps>({
 	name: "",
 	onSetName: () => {},
 });

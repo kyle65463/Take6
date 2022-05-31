@@ -1,11 +1,13 @@
 import { ChatEvent } from "@models/chat_events";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { GameEvent } from "@models/game_events";
 import { PlayerEvent } from "@models/player_events";
 import { Room } from "@models/room";
 import { RoomEvent } from "@models/room_event";
 import { initSocket } from "@services/socket";
 import "@styles/globals.css";
-import { EventsContext, NameContext, SocketContext } from "@utils/context";
+import { EventsContext, UserContext, SocketContext } from "@utils/context";
+import { auth } from "@utils/firebase";
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -13,6 +15,7 @@ import { useCallback, useState } from "react";
 import { Socket } from "socket.io-client";
 
 function MyApp({ Component, pageProps }: AppProps) {
+	const [user, loading, error] = useAuthState(auth);
 	const [socket, setSocket] = useState<Socket | undefined>();
 	const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
 	const [chatEvents, setChatEvents] = useState<ChatEvent[]>([]);
@@ -96,7 +99,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 	);
 
 	return (
-		<NameContext.Provider value={{ name, room, onSetName }}>
+		<UserContext.Provider value={{ name, room, onSetName }}>
 			<SocketContext.Provider value={{ socket, connectServer }}>
 				<EventsContext.Provider
 					value={{
@@ -119,7 +122,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 					</div>
 				</EventsContext.Provider>
 			</SocketContext.Provider>
-		</NameContext.Provider>
+		</UserContext.Provider>
 	);
 }
 

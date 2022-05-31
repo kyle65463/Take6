@@ -1,6 +1,6 @@
 import Button from "@common/components/Button";
 import { ChatEvent } from "@models/chat_events";
-import { EventsContext, NameContext } from "@utils/context";
+import { EventsContext, UserContext } from "@utils/context";
 import { useContext, useRef } from "react";
 import ChatList from "./ChatList";
 import { useChat } from "./useChat";
@@ -9,7 +9,7 @@ export default function ChatPage() {
 	const { chatList } = useChat();
 	const messageRef = useRef<HTMLInputElement | null>(null);
 	const { sendChatEvent } = useContext(EventsContext);
-	const { name } = useContext(NameContext);
+	const { name } = useContext(UserContext);
 
 	// Invoked when the player submit message
 	function messageSend() {

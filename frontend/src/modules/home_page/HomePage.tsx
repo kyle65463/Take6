@@ -1,5 +1,5 @@
 import Button from "@common/components/Button";
-import { NameContext, SocketContext } from "@utils/context";
+import { UserContext, SocketContext } from "@utils/context";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -10,7 +10,7 @@ function HomePage() {
 	const { connectServer } = useContext(SocketContext);
 	const [name, setName] = useState("");
 	const roomNumberRef = useRef<HTMLInputElement | null>(null);
-	const { onSetName, room } = useContext(NameContext);
+	const { onSetName, room } = useContext(UserContext);
 	const [mode, setMode] = useState<HomePageMode>("enter name");
 	const router = useRouter();
 

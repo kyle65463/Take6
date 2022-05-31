@@ -1,12 +1,12 @@
 import Button from "@common/components/Button";
 import { PlayerReadyEvent } from "@models/player_events";
 import ChatPage from "@modules/chat_page/ChatPage";
-import { EventsContext, NameContext } from "@utils/context";
+import { EventsContext, UserContext } from "@utils/context";
 import { useRouter } from "next/router";
 import { useCallback, useContext, useEffect } from "react";
 
 function RoomPage() {
-	const { room } = useContext(NameContext);
+	const { room } = useContext(UserContext);
 	const router = useRouter();
 	const { sendPlayerEvent } = useContext(EventsContext);
 
