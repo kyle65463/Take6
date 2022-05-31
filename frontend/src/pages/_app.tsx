@@ -1,6 +1,8 @@
 import { ChatEvent } from "@models/chat_events";
 import { GameEvent } from "@models/game_events";
 import { PlayerEvent } from "@models/player_events";
+import { Room } from "@models/room";
+import { RoomEvent } from "@models/room_event";
 import { initSocket } from "@services/socket";
 import "@styles/globals.css";
 import { EventsContext, NameContext, SocketContext } from "@utils/context";
@@ -14,6 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 	const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
 	const [chatEvents, setChatEvents] = useState<ChatEvent[]>([]);
 	const [name, setName] = useState<string>("");
+	const [room, setRoom] = useState<Room | undefined>();
 
 	// Triggered when receiving new game event from server
 	const onGameEvent = useCallback((gameEvent: GameEvent) => {
@@ -29,6 +32,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 		setChatEvents((oldChatEvents) => {
 			return [...oldChatEvents, chatEvent];
 		});
+	}, []);
+
+	// Triggered when receiving new room event from server
+	const onRoomEvent = useCallback((roomEvent: RoomEvent) => {
+		setRoom({ ...roomEvent });
 	}, []);
 
 	const clearGameEvents = useCallback(() => {
@@ -47,7 +55,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 				const onConnect = (newSocket: Socket) => {
 					setSocket(newSocket);
 				};
-				initSocket({ onConnect, onGameEvent, onChatEvent, name, roomId });
+				initSocket({ onConnect, onGameEvent, onChatEvent, onRoomEvent, name, roomId });
 			}
 		},
 		[socket]
@@ -83,7 +91,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 	);
 
 	return (
-		<NameContext.Provider value={{ name, onSetName }}>
+		<NameContext.Provider value={{ name, room, onSetName }}>
 			<SocketContext.Provider value={{ socket, connectServer }}>
 				<EventsContext.Provider
 					value={{

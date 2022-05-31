@@ -1,6 +1,7 @@
 import { ChatEvent } from "@models/chat_events";
 import { GameEvent } from "@models/game_events";
 import { PlayerEvent } from "@models/player_events";
+import { Room } from "@models/room";
 import { createContext } from "react";
 import { Socket } from "socket.io-client";
 
@@ -37,6 +38,7 @@ export const EventsContext = createContext<EventsContextProps>({
 
 interface NameContextProps {
 	name: string;
+	room?: Room;
 	onSetName: (name: string) => void;
 }
 
