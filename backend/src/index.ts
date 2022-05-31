@@ -34,19 +34,7 @@ const rawClients: { socket: Socket; roomId?: string }[] = [];
 
 io.on("connection", (socket: Socket) => {
 	console.log("connected");
-	const player: Player = {
-		id: socket.id, //use socketId as client's id
-		name: socket.id, // TODO: name?
-		cards: Array.from(Array(10).keys()).map(() => randomCard()),
-		score: 0,
-		isReady: false,
-	};
 	rawClients.push({ socket });
-	player.cards.sort((a, b) => a.number - b.number);
-	const client: Client = {
-		player: player,
-		socket: socket,
-	};
 
 	socket.on("player event", (playerEvent: PlayerEvent) => {
 		console.log("event: ", playerEvent.type);
@@ -79,7 +67,7 @@ io.on("connection", (socket: Socket) => {
 	socket.on("chat event", (chatEvent: ChatEvent) => {
 		const game = findGame(games, rawClients, socket.id);
 		if (!game) return;
-		for(const client of game.clients) {
+		for (const client of game.clients) {
 			client.socket.emit("chat event", chatEvent);
 		}
 	});
@@ -99,7 +87,7 @@ function addNewPlayer(
 	socketId: string,
 	rawClients: { socket: Socket; roomId?: string }[]
 ) {
-	let { playerName, roomId } = playerInfoEvent;
+	let { playerName, roomId, photoURL } = playerInfoEvent;
 	let game: Game | undefined;
 	if (roomId) {
 		// Join an existing game
@@ -120,6 +108,7 @@ function addNewPlayer(
 	const player: Player = {
 		id: socketId,
 		name: playerName,
+		photoURL,
 		cards: Array.from(Array(10).keys()).map(() => randomCard()),
 		score: 0,
 		isReady: false,
@@ -266,7 +255,7 @@ function gameStart(game: Game) {
 function getOtherPlayers(clients: Client[], player: Player): Omit<Player, "cards">[] {
 	const otherPlayers: Omit<Player, "cards">[] = clients
 		.filter((client) => client.player.id != player.id)
-		.map(({ player: { id, score, name, isReady } }) => ({ id, score, name, isReady }));
+		.map(({ player: { id, score, name, isReady, photoURL } }) => ({ id, score, name, isReady, photoURL }));
 	return otherPlayers;
 }
 

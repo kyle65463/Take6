@@ -7,6 +7,7 @@ export interface Player {
   cards: Card[];
   score: number;
   isReady: boolean;
+  photoURL: string;
 }
 
 export interface Client {

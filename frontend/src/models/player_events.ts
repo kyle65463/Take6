@@ -20,6 +20,7 @@ export interface SelectRowEvent extends PlayerEvent {
 
 export interface PlayerInfoEvent extends PlayerEvent {
 	playerName: string;
+	photoURL: string;
 	roomId?: string;
 }
 

@@ -69,6 +69,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 					onChatEvent,
 					onRoomEvent,
 					name: user.displayName ?? "no name",
+					photoURL: user.photoURL ?? '',
 					roomId,
 				});
 			}

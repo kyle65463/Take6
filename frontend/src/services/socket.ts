@@ -19,6 +19,7 @@ interface InitSocketProps {
 
 	// Will send player name to server
 	name: string;
+	photoURL: string;
 	roomId?: string;
 }
 
@@ -28,6 +29,7 @@ export function initSocket({
 	onChatEvent,
 	onRoomEvent,
 	name,
+	photoURL,
 	roomId,
 }: InitSocketProps) {
 	const socket = io("ws://localhost:8888");
@@ -37,6 +39,7 @@ export function initSocket({
 			id: generateUid(),
 			type: "player info",
 			playerName: name,
+			photoURL,
 			roomId,
 		};
 		socket.emit("player event", playerInfoEvent);
