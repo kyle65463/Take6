@@ -14,7 +14,7 @@ function HomePage() {
 	}, []);
 
 	const onJoinRoom = useCallback(() => {
-		connectServer(name);
+		connectServer(name, '1234');
 	}, []);
 
 	return (

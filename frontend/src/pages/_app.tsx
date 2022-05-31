@@ -42,13 +42,12 @@ function MyApp({ Component, pageProps }: AppProps) {
 	// Init the socket and add it to the socket context when connected
 	// Note: only update the state when the socket is connected
 	const connectServer = useCallback(
-		(name: string) => {
+		(name: string, roomId?: string) => {
 			if (!socket) {
 				const onConnect = (newSocket: Socket) => {
 					setSocket(newSocket);
 				};
-
-				initSocket({ onConnect, onGameEvent, onChatEvent, name });
+				initSocket({ onConnect, onGameEvent, onChatEvent, name, roomId });
 			}
 		},
 		[socket]

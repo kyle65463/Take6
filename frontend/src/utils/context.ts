@@ -6,7 +6,7 @@ import { Socket } from "socket.io-client";
 
 interface SocketContextProps {
 	socket?: Socket;
-	connectServer: (name: string) => void;
+	connectServer: (name: string, roomId?: string) => void;
 }
 
 export const SocketContext = createContext<SocketContextProps>({

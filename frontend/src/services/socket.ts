@@ -16,6 +16,7 @@ interface InitSocketProps {
 
 	// Will send player name to server
 	name: string;
+	roomId?: string;
 }
 
 export function initSocket({
@@ -23,6 +24,7 @@ export function initSocket({
 	onGameEvent,
 	onChatEvent,
 	name,
+	roomId,
 }: InitSocketProps) {
 	const socket = io("ws://localhost:8888");
 	socket.on("connect", (...args) => {
@@ -31,6 +33,7 @@ export function initSocket({
 			id: generateUid(),
 			type: "player info",
 			playerName: name,
+			roomId,
 		};
 		socket.emit("player event", playerInfoEvent);
 	});
