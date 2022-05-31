@@ -1,7 +1,7 @@
 import { Card } from "./card";
 import { Player } from "./player";
 
-export type PlayerEventType = "play card" | "select row" | "player info";
+export type PlayerEventType = "play card" | "select row" | "player info" | "player ready";;
 
 export interface PlayerEvent {
     type: PlayerEventType;
@@ -21,3 +21,5 @@ export interface PlayerInfoEvent extends PlayerEvent {
     playerName: string;
     roomId?: string;
 }
+
+export interface PlayerReadyEvent extends PlayerEvent {}
