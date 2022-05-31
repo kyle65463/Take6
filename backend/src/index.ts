@@ -210,8 +210,8 @@ async function playerSelectRow(game: Game, playCardEvent: SelectRowEvent) {
 	//continueing decideRow
 	let sz = playedCardInfo.length;
 	for (let i = 0; i < sz; i++) {
-		decideRow(game);
 		await delay(1000);
+		decideRow(game);
 		updateGameStatus(game);
 		if (game.selectRowPlayer) {
 			game.selectRowPlayer = undefined;
