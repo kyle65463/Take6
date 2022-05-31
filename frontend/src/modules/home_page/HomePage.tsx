@@ -1,12 +1,14 @@
 import Button from "@common/components/Button";
 import { NameContext, SocketContext } from "@utils/context";
 import Link from "next/link";
-import { useCallback, useContext, useRef } from "react";
+import { useRouter } from "next/router";
+import { useCallback, useContext, useEffect, useRef } from "react";
 
 function HomePage() {
 	const { connectServer } = useContext(SocketContext);
 	const nameRef = useRef<HTMLInputElement | null>(null);
-	const { onSetName } = useContext(NameContext);
+	const { onSetName, room } = useContext(NameContext);
+	const router = useRouter();
 
 	const name = "";
 	const onCreateRoom = useCallback(() => {
@@ -14,8 +16,14 @@ function HomePage() {
 	}, []);
 
 	const onJoinRoom = useCallback(() => {
-		connectServer(name, '1234');
+		connectServer(name, "1234");
 	}, []);
+
+	useEffect(() => {
+		if (room) {
+			router.push("room");
+		}
+	}, [room]);
 
 	return (
 		<div className='layout flex'>
