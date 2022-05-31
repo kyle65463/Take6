@@ -1,20 +1,19 @@
 import { getRandomInt } from "../utils";
+import { Game } from "./game";
 
 export interface Card {
 	number: number;
 	score: number;
 }
 
-// ! Used for mocked server
-const numberList: number[] = [];
-export function randomCard(): Card {
+export function randomCard(game: Game): Card {
 	let i = 0;
 	let randInt = getRandomInt(1, 105);
-	while (i < 100 && numberList.length < 105 && numberList.includes(randInt)) {
+	while (i < 100 && game.usedCards.length < 105 && game.usedCards.includes(randInt)) {
 		randInt = getRandomInt(1, 105);
 		i++;
 	}
-	numberList.push(randInt);
+	game.usedCards.push(randInt);
 	return {
 		number: randInt,
 		score: getRandomInt(1, 4),

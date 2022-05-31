@@ -26,6 +26,7 @@ function newGame(): Game {
 		playedCardInfo: [],
 		round: 0,
 		playerReadyCount: 0,
+		usedCards: [],
 	};
 }
 
@@ -109,7 +110,7 @@ function addNewPlayer(
 		id: socketId,
 		name: playerName,
 		photoURL,
-		cards: Array.from(Array(10).keys()).map(() => randomCard()),
+		cards: Array.from(Array(10).keys()).map(() => randomCard(game ?? newGame())),
 		score: 0,
 		isReady: false,
 	};
@@ -232,7 +233,7 @@ function gameStart(game: Game) {
 	const initialFieldCards: Card[] = [];
 	game.round = 0;
 	for (let i = 0; i < 4; i++) {
-		const card: Card = randomCard();
+		const card: Card = randomCard(game);
 		initialFieldCards.push(card);
 		game.fieldCards[i].push(card);
 	}
