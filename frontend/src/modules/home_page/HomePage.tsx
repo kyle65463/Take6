@@ -4,26 +4,27 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
-type HomePageMode = "enter room number" | "choose room type";
+type HomePageMode = "enter room number" | "choose room type" | "enter name";
 
 function HomePage() {
 	const { connectServer } = useContext(SocketContext);
-	const nameRef = useRef<HTMLInputElement | null>(null);
+	const [name, setName] = useState("");
 	const roomNumberRef = useRef<HTMLInputElement | null>(null);
 	const { onSetName, room } = useContext(NameContext);
-	const [mode, setMode] = useState<HomePageMode>("choose room type");
+	const [mode, setMode] = useState<HomePageMode>("enter name");
 	const router = useRouter();
 
-	const name = "";
 	const onCreateRoom = useCallback(() => {
+		if (name.length === 0) return;
 		connectServer(name);
-	}, []);
+	}, [name]);
 
 	const onJoinRoom = useCallback(() => {
-		const roomNumber = roomNumberRef.current?.value ?? '';
-		if(roomNumber.length === 0) return;
+		const roomNumber = roomNumberRef.current?.value ?? "";
+		if (roomNumber.length === 0) return;
+		if (name.length === 0) return;
 		connectServer(name, roomNumber);
-	}, []);
+	}, [name]);
 
 	useEffect(() => {
 		if (room) {
@@ -58,6 +59,31 @@ function HomePage() {
 								<Button onClick={() => setMode("choose room type")}>Back</Button>
 								<Button style='primary' onClick={onJoinRoom}>
 									Join
+								</Button>
+							</div>
+						</div>
+					)}
+					{mode === "enter name" && (
+						<div>
+							<h2 className='mb-1.5'>Name</h2>
+							<input
+								type='text'
+								className='input text-xl'
+								onChange={(event) => {
+									setName(event.target.value);
+									onSetName(event.target.value);
+								}}
+							/>
+							<div className='flex justify-between mt-6'>
+								<Button
+									style='primary'
+									onClick={() => {
+										if (name.length > 0) {
+											setMode("choose room type");
+										}
+									}}
+								>
+									Confirm
 								</Button>
 							</div>
 						</div>
