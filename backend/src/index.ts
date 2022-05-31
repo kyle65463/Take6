@@ -18,15 +18,6 @@ export const io = new Server(httpServer, {
 });
 httpServer.listen(8888);
 
-const game: Game = {
-	clients: [],
-	fieldCards: [[], [], [], []],
-	mode: "none",
-	playedCardInfo: [],
-	round: 0,
-	playerReadyCount: 0,
-};
-
 function newGame(): Game {
 	return {
 		clients: [],
@@ -56,18 +47,22 @@ io.on("connection", (socket: Socket) => {
 		player: player,
 		socket: socket,
 	};
-	game.clients.push(client);
 
-	//play event handler: collect 6 playerEvents in a round
 	socket.on("player event", (playerEvent: PlayerEvent) => {
 		console.log("event: ", playerEvent.type);
 		switch (playerEvent.type) {
-			case "play card":
+			case "play card": {
+				const game = findGame(games, rawClients, socket.id);
+				if (!game) return;
 				playerPlayedCard(game, playerEvent as PlayCardEvent);
 				break;
-			case "select row":
+			}
+			case "select row": {
+				const game = findGame(games, rawClients, socket.id);
+				if (!game) return;
 				playerSelectRow(game, playerEvent as SelectRowEvent);
 				break;
+			}
 			case "player info":
 				addNewPlayer(games, playerEvent as PlayerInfoEvent, socket.id, rawClients);
 				break;
@@ -169,6 +164,10 @@ function playerReady(game: Game, socketId: string, roomId: string) {
 		// console.log(roomEvent);
 		client.socket.emit("room event", roomEvent);
 	}
+	const allReady = clients.every((client) => client.player.isReady);
+	if (allReady && clients.length > 1) {
+		gameStart(game);
+	}
 }
 
 async function playerSelectRow(game: Game, playCardEvent: SelectRowEvent) {
@@ -235,6 +234,7 @@ function sendWinner(game: Game) {
 }
 
 function gameStart(game: Game) {
+	console.log("game start");
 	//generate initial board
 	const { clients } = game;
 	const initialFieldCards: Card[] = [];

@@ -8,6 +8,7 @@ import "@styles/globals.css";
 import { EventsContext, NameContext, SocketContext } from "@utils/context";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
 import { Socket } from "socket.io-client";
 
@@ -17,9 +18,13 @@ function MyApp({ Component, pageProps }: AppProps) {
 	const [chatEvents, setChatEvents] = useState<ChatEvent[]>([]);
 	const [name, setName] = useState<string>("");
 	const [room, setRoom] = useState<Room | undefined>();
+	const router = useRouter();
 
 	// Triggered when receiving new game event from server
 	const onGameEvent = useCallback((gameEvent: GameEvent) => {
+		if (gameEvent.type === "game start") {
+			router.push("play");
+		}
 		// Append the new event to the gameEvents array
 		setGameEvents((oldGameEvents) => {
 			return [...oldGameEvents, gameEvent];
