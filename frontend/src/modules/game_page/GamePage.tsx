@@ -1,9 +1,11 @@
 import Button from "@common/components/Button";
 import Modal from "@common/components/Modal";
+import ChatPage from "@modules/chat_page/ChatPage";
 import DisplayCard from "@modules/game_page/DisplayCard";
-import { SocketContext } from "@utils/context";
+import { SocketContext, UserContext } from "@utils/context";
+import { useRouter } from "next/router";
 import { useContext } from "react";
-import PlayerCard from "./PlayerCard";
+import PlayerInfo from "./PlayerInfo";
 import { useGame } from "./useGame";
 
 function GamePage() {
@@ -18,8 +20,10 @@ function GamePage() {
 		selectHandCard,
 		playCard,
 	} = useGame();
-	const { socket } = useContext(SocketContext);
+	const { socket, clearSocket } = useContext(SocketContext);
+	const { clearRoom } = useContext(UserContext);
 	const connecting = socket === undefined;
+	const router = useRouter();
 
 	return (
 		<div className='layout'>
@@ -52,22 +56,28 @@ function GamePage() {
 							<section className='flex mr-16'>
 								{playedCardInfo?.map(({ playerName, card }) => (
 									<div className=''>
-										<p className='mb-2'>{playerName}</p>
+										<p className='font-bold pl-2 mb-2'>{playerName}</p>
 										<DisplayCard size='sm' card={card} />
 									</div>
 								))}
 							</section>
 
 							{/* Players info */}
-							<section>
-								{game.otherPlayers.map((player) => (
-									<PlayerCard player={player} />
-								))}
+							<section className='flex flex-col items-end'>
+								<div className='flex'>
+									{game.otherPlayers.map((player) => (
+										<div className='ml-6'>
+											<PlayerInfo player={player} />
+										</div>
+									))}
+								</div>
+								<ChatPage />
 							</section>
 						</div>
 					</div>
 
-					<section className='mt-12'>
+					{/* Self info and Confirm button */}
+					<section className='mt-6'>
 						<div className='px-16 w-full flex justify-between items-end mb-4'>
 							<p>
 								<span className='text-xl font-bold mr-4'>{game.player.name}</span>
@@ -97,20 +107,34 @@ function GamePage() {
 						<Modal
 							title='Game Over'
 							buttonText='Play again'
-							isShow={winners !== undefined}
-							closeModal={() => {
-								location.reload();
+							onConfirm={() => {
+								clearRoom();
+								socket?.disconnect();
+								clearSocket();
+								router.push("/");
 							}}
+							isShow={winners !== undefined}
+							closeModal={() => {}}
 						>
-							<div>
-								<p>The game is over, the winner is:</p>
-								<div className='mt-10 mb-6'>
-									{winners?.map(({ name }) => (
-										<div className='flex justify-center items-end my-6'>
-											<span className='text-3xl font-bold'>{name}</span>
-										</div>
-									))}
-								</div>
+							<div className='relative overflow-y-auto'>
+								<table className='w-full text-lg text-left text-gray-500 '>
+									<thead className='text-gray-700 uppercase'>
+										<tr>
+											<th>Rank</th>
+											<th>Name</th>
+											<th>Score</th>
+										</tr>
+									</thead>
+									<tbody>
+										{winners?.map(({ name, score }, index) => (
+											<tr className='bg-white py-2'>
+												<td>{index + 1}</td>
+												<td>{name}</td>
+												<td>{score}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
 							</div>
 						</Modal>
 					</section>

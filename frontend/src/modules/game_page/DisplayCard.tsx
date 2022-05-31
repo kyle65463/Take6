@@ -12,28 +12,42 @@ interface HandCardProps {
 	disabled?: boolean;
 }
 
-function DisplayCard({ card, selected, onClick, size = "base", disabled = false }: HandCardProps) {
+function DisplayCard({ card, selected = false, onClick, size = "base", disabled = false }: HandCardProps) {
 	const { number, score } = card;
+	function generateTokens() {
+		var token = "";
+		for (let i = 0; i < score; i++) {
+			token += "&";
+		}
+		return token;
+	}
+
 	return (
 		<div
 			onClick={onClick}
-			className={clsx("card rounded-md shadow-sm mx-2 my-2 duration-75 select-none", {
+			className={clsx("card rounded-md shadow-sm m-2 duration-150 select-none", {
 				// Base size
 				"h-40": size === "base",
 				"w-28": size === "base",
-				"cursor-pointer ": onClick !== undefined,
+				"cursor-pointer": onClick !== undefined,
 				// Small size
-				"h-28": size === "sm",
-				"w-20": size === "sm",
-				"bg-base-100": !disabled,
+				"h-24": size === "sm",
+				"w-16": size === "sm",
+				"bg-gradient-to-b from-rose-600/50 to-rose-300/50": !disabled && score === 3,
+				"bg-gradient-to-b from-amber-600/50 to-amber-300/50": !disabled && score === 2,
+				"bg-gradient-to-b from-sky-600/50 to-sky-300/50": !disabled && score === 1,
 				"bg-gray-300": disabled,
 				"text-gray-500": disabled,
 				"selected-card": selected,
 			})}
 		>
 			<div className='card-body flex justify-center items-center'>
-				<span className='text-2xl font-bold'>{number}</span>
-				<span className='mt-3'>x{score}</span>
+				<span className={clsx("font-bold", { "text-2xl": size === "base", "text-lg": size === "sm" })}>
+					{number}
+				</span>
+				<span className={clsx({ "mt-3": size === "base", "mt-0": size === "sm", "text-sm": size === "sm" })}>
+					{generateTokens()}
+				</span>
 			</div>
 		</div>
 	);

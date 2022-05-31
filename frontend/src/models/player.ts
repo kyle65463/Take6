@@ -1,29 +1,14 @@
-import { Card, randomCard } from "./card";
+import { Card } from "./card";
 
 export interface Player {
-	name: string;
-	score: number;
+    name: string;
+    score: number;
+    photoURL: string;
 }
 
 export interface SelfPlayer {
-	name: string;
-	cards: Card[];
-	score: number;
-}
-
-// ! Used for mocked server
-export function randomPlayer(index: number): Player {
-	return {
-		name: `Player ${index}`,
-		score: 0,
-	};
-}
-
-// ! Used for mocked server
-export function randomSelfPlayer(): SelfPlayer {
-	return {
-		name: "You",
-		cards: Array.from(Array(10).keys()).map(() => randomCard()),
-		score: 0,
-	};
+    name: string;
+    cards: Card[];
+    score: number;
+    photoURL: string;
 }

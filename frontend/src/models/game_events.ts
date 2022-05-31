@@ -1,4 +1,5 @@
 import { Card } from "./card";
+import { ModeType } from "./game";
 import { Player, SelfPlayer } from "./player";
 
 export type GameEventType =
@@ -8,7 +9,8 @@ export type GameEventType =
 	| "append row"
 	| "clear row"
 	| "start row selection"
-	| "start card selection";
+	| "start card selection"
+	| "game status update";
 
 export interface GameEvent {
 	id: string;
@@ -25,23 +27,12 @@ export interface GameOverEvent extends GameEvent {
 	winners: (Player | SelfPlayer)[];
 }
 
-export interface AllPlayerPlayedEvent extends GameEvent {
+export interface UpdateGameStatusEvent extends GameEvent {
+	player: SelfPlayer;
+	otherPlayers: Player[];
+	fieldCards: Card[][];
+	mode: ModeType;
+
 	// The list of players and the card they played for this round
-	playedCardInfo: { playerName: string; card: Card }[]; // length === numPlayer
+	playedCardInfo: { playerName: string; card: Card }[]; // minus one per round
 }
-
-export interface AppendRowEvent extends GameEvent {
-	playerName: string; // The player played the card
-	card: Card; // The played card
-	rowIdx: number; // The target row of the played card
-}
-
-export interface ClearRowEvent extends GameEvent {
-	playerName: string; // The player played the card
-	card: Card; // The new leftmost card of the row
-	rowIdx: number; // The target row to clear
-}
-
-export interface StartRowSelectionEvent extends GameEvent {}
-
-export interface StartCardSelectionEvent extends GameEvent {}
