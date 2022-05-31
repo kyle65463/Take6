@@ -28,7 +28,7 @@ function RoomPage() {
 	const { player, otherPlayers, roomId } = room;
 
 	return (
-		<div className='layout flex'>
+		<div className='px-24 py-12'>
 			<div className='flex flex-row justify-between'>
 				<div>
 					<div className='mb-6'>
@@ -39,16 +39,19 @@ function RoomPage() {
 						<p>Other players:</p>
 						{otherPlayers.map((player) => (
 							<p>
-								{player.name} {player.isReady ? "ready" : "not ready"}
+								{player.name} <span className="text-gray-400"> {player.isReady ? "ready" : "not ready"}</span>
 							</p>
 						))}
 					</div>
 					<div>
 						<p>You: </p>
 						<p>
-							{player.name} {player.isReady ? "ready" : "not ready"}
+							{player.name} <span className="text-gray-400"> {player.isReady ? "ready" : "not ready"}</span>
 						</p>
-						<Button style={player.isReady ? "disabled" : "primary"} onClick={player.isReady ? undefined : onReady}>
+						<Button
+							style={player.isReady ? "disabled" : "primary"}
+							onClick={player.isReady ? undefined : onReady}
+						>
 							Ready
 						</Button>
 					</div>

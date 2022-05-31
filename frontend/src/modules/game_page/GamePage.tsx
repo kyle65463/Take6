@@ -61,9 +61,13 @@ function GamePage() {
 
 							{/* Players info */}
 							<section>
-								{game.otherPlayers.map((player) => (
-									<PlayerInfo player={player} />
-								))}
+								<div className='flex'>
+									{game.otherPlayers.map((player) => (
+										<div className="mr-6">
+											<PlayerInfo player={player} />
+										</div>
+									))}
+								</div>
 								<ChatPage />
 							</section>
 						</div>

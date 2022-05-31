@@ -26,8 +26,8 @@ export default function ChatPage() {
 	}
 
 	return (
-		<main className='flex-1 flex flex-col justify-between mb-12'>
-			<div className='mt-3 pl-3 pt-1 bg-emerald-200/30 rounded-lg box-border h-80 w-80 border-4 border-emerald-400 overflow-auto'>
+		<main className='flex-1 flex flex-col justify-between'>
+			<div className='pl-3 pt-1 bg-emerald-200/30 rounded-lg box-border h-80 w-80 border-4 border-emerald-400 overflow-auto'>
 				{/* Chat room */}
 				<ul id='messages'></ul>
 				<ChatList chats={chatList} />

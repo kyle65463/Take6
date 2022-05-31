@@ -14,12 +14,12 @@ interface HandCardProps {
 
 function DisplayCard({ card, selected = false, onClick, size = "base", disabled = false }: HandCardProps) {
 	const { number, score } = card;
-	function generateTokens(){
-		var token = ""
-		for(let i = 0; i < score; i++){
-			token += "&"
+	function generateTokens() {
+		var token = "";
+		for (let i = 0; i < score; i++) {
+			token += "&";
 		}
-		return token
+		return token;
 	}
 
 	return (
@@ -31,8 +31,8 @@ function DisplayCard({ card, selected = false, onClick, size = "base", disabled 
 				"w-28": size === "base",
 				"cursor-pointer": onClick !== undefined,
 				// Small size
-				"h-28": size === "sm",
-				"w-20": size === "sm",
+				"h-24": size === "sm",
+				"w-16": size === "sm",
 				"bg-gradient-to-b from-rose-600/50 to-rose-300/50": !disabled && score === 3,
 				"bg-gradient-to-b from-amber-600/50 to-amber-300/50": !disabled && score === 2,
 				"bg-gradient-to-b from-sky-600/50 to-sky-300/50": !disabled && score === 1,
@@ -42,8 +42,12 @@ function DisplayCard({ card, selected = false, onClick, size = "base", disabled 
 			})}
 		>
 			<div className='card-body flex justify-center items-center'>
-				<span className='text-2xl font-bold'>{number}</span>
-				<span className='mt-3'>{generateTokens()}</span>
+				<span className={clsx("font-bold", { "text-2xl": size === "base", "text-lg": size === "sm" })}>
+					{number}
+				</span>
+				<span className={clsx({ "mt-3": size === "base", "mt-0": size === "sm", "text-sm": size === "sm" })}>
+					{generateTokens()}
+				</span>
 			</div>
 		</div>
 	);
