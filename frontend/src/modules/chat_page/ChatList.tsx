@@ -7,12 +7,12 @@ interface ChatListProps {
 
 export default function ChatList({ chats }: ChatListProps) {
     return (
-        <div>
-            {chats.map((chat) => (
-                <div>
-                    {chat.name}: {chat.msg}
-                </div>
-            ))}
-        </div>
-    );
+		<div>
+			{chats.map((chat) => (
+				<div>
+					<span className="text-primary">{chat.name}</span>: {chat.msg}
+				</div>
+			))}
+		</div>
+	);
 }
