@@ -14,7 +14,6 @@ function HomePage() {
 	const roomNumberRef = useRef<HTMLInputElement | null>(null);
 	const { user, room } = useContext(UserContext);
 	const [mode, setMode] = useState<HomePageMode>("enter name");
-	const [signInWithFacebook] = useSignInWithFacebook(auth);
 	const [signInWithGoogle] = useSignInWithGoogle(auth);
 	const router = useRouter();
 
@@ -25,10 +24,6 @@ function HomePage() {
 
 	const onGoogleLogin = useCallback(() => {
 		signInWithGoogle();
-	}, []);
-
-	const onFacebookLogin = useCallback(() => {
-		signInWithFacebook();
 	}, []);
 
 	const onLogOut = useCallback(() => {
@@ -100,18 +95,11 @@ function HomePage() {
 						</div>
 					)}
 					{mode === "enter name" && (
-						<div className='flex flex-col'>
+						<div className='flex flex-col mt-12'>
 							<Button style='outline' onClick={onGoogleLogin}>
 								<>
 									<img src='google.svg' alt='' className='h-6 w-6 mr-2' />
 									使用 Google 帳號登入
-								</>
-							</Button>
-							<div className='h-4' />
-							<Button style='outline' onClick={onFacebookLogin}>
-								<>
-									<img src='facebook.svg' alt='' className='h-6 w-6 mr-2' />
-									使用 Facebook 帳號登入
 								</>
 							</Button>
 						</div>
