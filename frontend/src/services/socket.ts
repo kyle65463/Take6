@@ -51,7 +51,7 @@ export function initSocket({
 	});
 
 	socket.on("room event", (chatEvent) => {
-		onChatEvent(chatEvent);
+		onRoomEvent(chatEvent);
 	});
 	return socket;
 }
