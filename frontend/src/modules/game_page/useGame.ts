@@ -62,8 +62,6 @@ export function useGame() {
 				case "none":
 					break;
 			}
-			console.log(inRowSelectionMode);
-			console.log(inCardSelectionMode);
 		},
 		[]
 	);
