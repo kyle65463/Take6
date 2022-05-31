@@ -1,27 +1,40 @@
 import Button from "@common/components/Button";
+import { signOut } from "@firebase/auth";
 import { UserContext, SocketContext } from "@utils/context";
+import { auth } from "@utils/firebase";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useSignInWithFacebook, useSignInWithGoogle } from "react-firebase-hooks/auth";
 
 type HomePageMode = "enter room number" | "choose room type" | "enter name";
 
 function HomePage() {
 	const { connectServer } = useContext(SocketContext);
-	const [name, setName] = useState("");
 	const roomNumberRef = useRef<HTMLInputElement | null>(null);
-	const { onSetName, room } = useContext(UserContext);
+	const { user, room } = useContext(UserContext);
 	const [mode, setMode] = useState<HomePageMode>("enter name");
+	const [signInWithFacebook] = useSignInWithFacebook(auth);
+	const [signInWithGoogle] = useSignInWithGoogle(auth);
 	const router = useRouter();
 
 	const onCreateRoom = useCallback(() => {
-		if (name.length === 0) return;
-		connectServer(name);
+		if (user?.displayName?.length === 0) return;
+		connectServer(user?.displayName);
 	}, [name]);
 
-	const onGoogleLogin = useCallback(() => {}, []);
+	const onGoogleLogin = useCallback(() => {
+		signInWithGoogle();
+	}, []);
 
-	const onFacebookLogin = useCallback(() => {}, []);
+	const onFacebookLogin = useCallback(() => {
+		signInWithFacebook();
+	}, []);
+
+	const onLogOut = useCallback(() => {
+		setMode("enter name");
+		signOut(auth);
+	}, []);
 
 	const onJoinRoom = useCallback(() => {
 		const roomNumber = roomNumberRef.current?.value ?? "";
@@ -36,26 +49,45 @@ function HomePage() {
 		}
 	}, [room]);
 
+	useEffect(() => {
+		if (user && mode === "enter name") {
+			setMode("choose room type");
+		}
+	}, [user]);
+
 	return (
 		<div className='layout flex'>
 			<div className='flex flex-1 h-full flex-col w-full justify-center items-center'>
 				<h1 className='text-5xl'>誰是牛頭王</h1>
-				<div className='flex flex-row justify-center mt-20 mb-20 h-36'>
+				<div className='flex flex-row justify-center mt-20 mb-32 h-36'>
 					{mode === "choose room type" && (
-						<>
-							<button onClick={onCreateRoom} className='btn btn-primary w-56 h-36 text-2xl'>
-								Create room
-							</button>
-							<div className='w-20' />
-							<button
-								onClick={() => setMode("enter room number")}
-								className='btn btn-primary w-56 h-36 text-2xl'
-							>
-								Join room
-							</button>
-						</>
+						<div>
+							<div className='flex flex-row justify-center'>
+								<button onClick={onCreateRoom} className='btn btn-primary w-56 h-36 text-2xl'>
+									Create room
+								</button>
+								<div className='w-20' />
+								<button
+									onClick={() => setMode("enter room number")}
+									className='btn btn-primary w-56 h-36 text-2xl'
+								>
+									Join room
+								</button>
+							</div>
+							<div className='mt-12 flex justify-center items-center'>
+								<p>
+									<img
+										src={user?.photoURL ?? ""}
+										alt=''
+										className='w-12 h-12 avatar mask mask-circle'
+									/>
+									<span className='ml-2 mr-12 text-xl'>{user?.displayName}</span>
+								</p>
+								<Button onClick={onLogOut}>Log out</Button>
+							</div>
+						</div>
 					)}
-					{mode === "enter room number" && (
+					{mode === "enter room number" && user && (
 						<div>
 							<h2 className='mb-1.5'>Room number</h2>
 							<input type='text' className='input text-xl' ref={roomNumberRef} />
@@ -76,7 +108,7 @@ function HomePage() {
 								</>
 							</Button>
 							<div className='h-4' />
-							<Button style='outline' onClick={onGoogleLogin}>
+							<Button style='outline' onClick={onFacebookLogin}>
 								<>
 									<img src='facebook.svg' alt='' className='h-6 w-6 mr-2' />
 									使用 Facebook 帳號登入

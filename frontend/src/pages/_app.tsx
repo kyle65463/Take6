@@ -99,7 +99,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 	);
 
 	return (
-		<UserContext.Provider value={{ name, room, onSetName }}>
+		<UserContext.Provider value={{ name, room, onSetName, user }}>
 			<SocketContext.Provider value={{ socket, connectServer }}>
 				<EventsContext.Provider
 					value={{

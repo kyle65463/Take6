@@ -2,6 +2,7 @@ import { ChatEvent } from "@models/chat_events";
 import { GameEvent } from "@models/game_events";
 import { PlayerEvent } from "@models/player_events";
 import { Room } from "@models/room";
+import { User } from "firebase/auth";
 import { createContext } from "react";
 import { Socket } from "socket.io-client";
 
@@ -38,11 +39,13 @@ export const EventsContext = createContext<EventsContextProps>({
 
 interface UserContextProps {
 	name: string;
+	user?: User | null;
 	room?: Room;
 	onSetName: (name: string) => void;
 }
 
 export const UserContext = createContext<UserContextProps>({
 	name: "",
+	user: null,
 	onSetName: () => {},
 });
