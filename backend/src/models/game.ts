@@ -3,6 +3,8 @@ import { Client, Player } from "./player";
 
 export type ModeType = "card selection" | "row selection" | "none";
 
+export type Games = { [key: string]: Game };
+
 export interface Game {
 	clients: Client[];
 	fieldCards: Card[][];
