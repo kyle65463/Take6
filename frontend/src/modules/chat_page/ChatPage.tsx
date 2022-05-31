@@ -9,7 +9,7 @@ export default function ChatPage() {
 	const { chatList } = useChat();
 	const messageRef = useRef<HTMLInputElement | null>(null);
 	const { sendChatEvent } = useContext(EventsContext);
-	const { name } = useContext(UserContext);
+	const { user } = useContext(UserContext);
 
 	// Invoked when the player submit message
 	function messageSend() {
@@ -19,7 +19,7 @@ export default function ChatPage() {
 			messageRef.current.value = "";
 		}
 		const chatEvent: ChatEvent = {
-			name: name,
+			name: user?.displayName ?? 'no name',
 			msg: message,
 		};
 		sendChatEvent(chatEvent);

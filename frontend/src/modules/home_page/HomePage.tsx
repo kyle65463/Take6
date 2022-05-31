@@ -19,9 +19,9 @@ function HomePage() {
 	const router = useRouter();
 
 	const onCreateRoom = useCallback(() => {
-		if (user?.displayName?.length === 0) return;
-		connectServer(user?.displayName);
-	}, [name]);
+		if (!user) return;
+		connectServer(user);
+	}, [user]);
 
 	const onGoogleLogin = useCallback(() => {
 		signInWithGoogle();
@@ -39,9 +39,9 @@ function HomePage() {
 	const onJoinRoom = useCallback(() => {
 		const roomNumber = roomNumberRef.current?.value ?? "";
 		if (roomNumber.length === 0) return;
-		if (name.length === 0) return;
-		connectServer(name, roomNumber);
-	}, [name]);
+		if (!user) return;
+		connectServer(user, roomNumber);
+	}, [user]);
 
 	useEffect(() => {
 		if (room) {

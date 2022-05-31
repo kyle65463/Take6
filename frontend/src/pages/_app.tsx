@@ -13,13 +13,13 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
 import { Socket } from "socket.io-client";
+import { User } from "firebase/auth";
 
 function MyApp({ Component, pageProps }: AppProps) {
 	const [user, loading, error] = useAuthState(auth);
 	const [socket, setSocket] = useState<Socket | undefined>();
 	const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
 	const [chatEvents, setChatEvents] = useState<ChatEvent[]>([]);
-	const [name, setName] = useState<string>("");
 	const [room, setRoom] = useState<Room | undefined>();
 	const router = useRouter();
 
@@ -58,12 +58,19 @@ function MyApp({ Component, pageProps }: AppProps) {
 	// Init the socket and add it to the socket context when connected
 	// Note: only update the state when the socket is connected
 	const connectServer = useCallback(
-		(name: string, roomId?: string) => {
+		(user: User, roomId?: string) => {
 			if (!socket) {
 				const onConnect = (newSocket: Socket) => {
 					setSocket(newSocket);
 				};
-				initSocket({ onConnect, onGameEvent, onChatEvent, onRoomEvent, name, roomId });
+				initSocket({
+					onConnect,
+					onGameEvent,
+					onChatEvent,
+					onRoomEvent,
+					name: user.displayName ?? "no name",
+					roomId,
+				});
 			}
 		},
 		[socket]
@@ -91,15 +98,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 		[socket]
 	);
 
-	const onSetName = useCallback(
-		(name: string) => {
-			setName(name);
-		},
-		[name]
-	);
-
 	return (
-		<UserContext.Provider value={{ name, room, onSetName, user }}>
+		<UserContext.Provider value={{ room, user }}>
 			<SocketContext.Provider value={{ socket, connectServer }}>
 				<EventsContext.Provider
 					value={{

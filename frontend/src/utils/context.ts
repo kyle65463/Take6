@@ -8,7 +8,7 @@ import { Socket } from "socket.io-client";
 
 interface SocketContextProps {
 	socket?: Socket;
-	connectServer: (name: string, roomId?: string) => void;
+	connectServer: (user: User, roomId?: string) => void;
 }
 
 export const SocketContext = createContext<SocketContextProps>({
@@ -38,14 +38,10 @@ export const EventsContext = createContext<EventsContextProps>({
 });
 
 interface UserContextProps {
-	name: string;
 	user?: User | null;
 	room?: Room;
-	onSetName: (name: string) => void;
 }
 
 export const UserContext = createContext<UserContextProps>({
-	name: "",
 	user: null,
-	onSetName: () => {},
 });
