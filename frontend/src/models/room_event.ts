@@ -1,6 +1,6 @@
 import { Player } from "./player";
 
-export interface RoomPlayer extends Omit<Player, "cards"> {
+export interface RoomPlayer extends Player {
 	isReady: boolean;
 }
 

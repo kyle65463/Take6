@@ -1,18 +1,24 @@
+import Button from "@common/components/Button";
+import { PlayerReadyEvent } from "@models/player_events";
 import ChatPage from "@modules/chat_page/ChatPage";
-import { NameContext, SocketContext } from "@utils/context";
+import { EventsContext, NameContext } from "@utils/context";
 import { useRouter } from "next/router";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect } from "react";
 
 function RoomPage() {
 	const { room } = useContext(NameContext);
 	const router = useRouter();
+	const { sendPlayerEvent } = useContext(EventsContext);
 
 	useEffect(() => {
-		console.log("hi");
 		if (!room) {
-			console.log("hi2");
 			router.push("/");
 		}
+	}, []);
+
+	const onReady = useCallback(() => {
+		const event: PlayerReadyEvent = { id: "", type: "player ready" };
+		sendPlayerEvent(event);
 	}, []);
 
 	if (!room) {
@@ -32,12 +38,19 @@ function RoomPage() {
 					<div className='mb-6'>
 						<p>Other players:</p>
 						{otherPlayers.map((player) => (
-							<p>{player.name}</p>
+							<p>
+								{player.name} {player.isReady ? "ready" : "not ready"}
+							</p>
 						))}
 					</div>
 					<div>
 						<p>You: </p>
-						<p>{player.name}</p>
+						<p>
+							{player.name} {player.isReady ? "ready" : "not ready"}
+						</p>
+						<Button style={player.isReady ? "disabled" : "primary"} onClick={player.isReady ? undefined : onReady}>
+							Ready
+						</Button>
 					</div>
 				</div>
 				<div>

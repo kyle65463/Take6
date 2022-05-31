@@ -127,11 +127,12 @@ function addNewPlayer(
 		isReady: false,
 	};
 	player.cards.sort((a, b) => a.number - b.number);
-	const socket = rawClients.find((socket) => socket.socket.id === socketId)?.socket;
-	if (!socket) return; // Should not happen
+	const rawClient = rawClients.find((socket) => socket.socket.id === socketId);
+	if (!rawClient) return; // Should not happen
+	rawClient.roomId = roomId;
 	const client: Client = {
 		player,
-		socket,
+		socket: rawClient.socket,
 	};
 	const clients = game.clients;
 	clients.push(client);
@@ -146,7 +147,6 @@ function addNewPlayer(
 			otherPlayers,
 			roomId,
 		};
-		console.log(roomEvent);
 		client.socket.emit("room event", roomEvent);
 	}
 }
@@ -166,7 +166,7 @@ function playerReady(game: Game, socketId: string, roomId: string) {
 			otherPlayers,
 			roomId,
 		};
-		console.log(roomEvent);
+		// console.log(roomEvent);
 		client.socket.emit("room event", roomEvent);
 	}
 }

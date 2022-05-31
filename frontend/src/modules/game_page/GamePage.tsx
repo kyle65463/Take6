@@ -2,7 +2,7 @@ import Button from "@common/components/Button";
 import Modal from "@common/components/Modal";
 import ChatPage from "@modules/chat_page/ChatPage";
 import DisplayCard from "@modules/game_page/DisplayCard";
-import { NameContext, SocketContext } from "@utils/context";
+import { SocketContext } from "@utils/context";
 import { useContext } from "react";
 import PlayerInfo from "./PlayerInfo";
 import { useGame } from "./useGame";
@@ -34,17 +34,11 @@ function GamePage() {
 								<div className='flex items-center'>
 									<>
 										{row.map((card) => (
-											<DisplayCard
-												size='sm'
-												card={card}
-											/>
+											<DisplayCard size='sm' card={card} />
 										))}
 										{inRowSelectionMode && (
 											<div className='ml-8'>
-												<Button
-													style='primary'
-													onClick={() => selectRow(i)}
-												>
+												<Button style='primary' onClick={() => selectRow(i)}>
 													Clear
 												</Button>
 											</div>
@@ -72,7 +66,6 @@ function GamePage() {
 								))}
 								<ChatPage />
 							</section>
-							
 						</div>
 					</div>
 
@@ -80,18 +73,11 @@ function GamePage() {
 					<section className='mt-6'>
 						<div className='px-16 w-full flex justify-between items-end mb-4'>
 							<p>
-								<span className='text-xl font-bold mr-4'>
-									{game.player.name}
-								</span>
-								<span className='text-gray-600'>
-									Score: {game.player.score}
-								</span>
+								<span className='text-xl font-bold mr-4'>{game.player.name}</span>
+								<span className='text-gray-600'>Score: {game.player.score}</span>
 							</p>
 							{selectedHandCardId !== undefined ? (
-								<Button
-									style='primary'
-									onClick={() => playCard(selectedHandCardId)}
-								>
+								<Button style='primary' onClick={() => playCard(selectedHandCardId)}>
 									Confirm
 								</Button>
 							) : (
@@ -102,11 +88,7 @@ function GamePage() {
 						<div className='flex justify-center'>
 							{game.player.cards.map((card, i) => (
 								<DisplayCard
-									onClick={
-										inCardSelectionMode
-											? () => selectHandCard(i)
-											: undefined
-									}
+									onClick={inCardSelectionMode ? () => selectHandCard(i) : undefined}
 									card={card}
 									selected={i === selectedHandCardId}
 									disabled={!inCardSelectionMode}
@@ -128,9 +110,7 @@ function GamePage() {
 								<div className='mt-10 mb-6'>
 									{winners?.map(({ name }) => (
 										<div className='flex justify-center items-end my-6'>
-											<span className='text-3xl font-bold'>
-												{name}
-											</span>
+											<span className='text-3xl font-bold'>{name}</span>
 										</div>
 									))}
 								</div>

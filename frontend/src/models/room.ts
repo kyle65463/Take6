@@ -1,7 +1,7 @@
-import { Player } from "./player";
+import { RoomPlayer } from "./room_event";
 
 export interface Room {
 	roomId: string;
-	player: Player;
-	otherPlayers: Player[];
+	player: RoomPlayer;
+	otherPlayers: RoomPlayer[];
 }
