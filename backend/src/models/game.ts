@@ -11,6 +11,7 @@ export interface Game {
 	mode: ModeType;
 	round: number;
 	playerReadyCount: number;
+	usedCards: number[];
 
 	// The list of players and the card they played for this round
 	playedCardInfo: { playerName: string; card: Card }[];
