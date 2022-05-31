@@ -76,9 +76,12 @@ io.on("connection", (socket: Socket) => {
 			}
 		}
 	});
-	socket.on("chat event", (playerEvent: ChatEvent) => {
-		//console.log("event: ", playerEvent);
-		io.sockets.emit("chat event", playerEvent);
+	socket.on("chat event", (chatEvent: ChatEvent) => {
+		const game = findGame(games, rawClients, socket.id);
+		if (!game) return;
+		for(const client of game.clients) {
+			client.socket.emit("chat event", chatEvent);
+		}
 	});
 });
 
