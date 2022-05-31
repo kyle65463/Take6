@@ -19,6 +19,10 @@ function HomePage() {
 		connectServer(name);
 	}, [name]);
 
+	const onGoogleLogin = useCallback(() => {}, []);
+
+	const onFacebookLogin = useCallback(() => {}, []);
+
 	const onJoinRoom = useCallback(() => {
 		const roomNumber = roomNumberRef.current?.value ?? "";
 		if (roomNumber.length === 0) return;
@@ -64,28 +68,20 @@ function HomePage() {
 						</div>
 					)}
 					{mode === "enter name" && (
-						<div>
-							<h2 className='mb-1.5'>Name</h2>
-							<input
-								type='text'
-								className='input text-xl'
-								onChange={(event) => {
-									setName(event.target.value);
-									onSetName(event.target.value);
-								}}
-							/>
-							<div className='flex justify-between mt-6'>
-								<Button
-									style='primary'
-									onClick={() => {
-										if (name.length > 0) {
-											setMode("choose room type");
-										}
-									}}
-								>
-									Confirm
-								</Button>
-							</div>
+						<div className='flex flex-col'>
+							<Button style='outline' onClick={onGoogleLogin}>
+								<>
+									<img src='google.svg' alt='' className='h-6 w-6 mr-2' />
+									使用 Google 帳號登入
+								</>
+							</Button>
+							<div className='h-4' />
+							<Button style='outline' onClick={onGoogleLogin}>
+								<>
+									<img src='facebook.svg' alt='' className='h-6 w-6 mr-2' />
+									使用 Facebook 帳號登入
+								</>
+							</Button>
 						</div>
 					)}
 				</div>
