@@ -27,6 +27,7 @@ function newGame(): Game {
 		round: 0,
 		playerReadyCount: 0,
 		usedCards: [],
+		isStart: false,
 	};
 }
 
@@ -117,6 +118,7 @@ function addNewPlayer(
 	if (!game) return; // Should not happen
 	if (!roomId) return; // Should not happen
 	if (game.clients.length >= 6) return;
+	if(game.isStart) return;
 
 	// Add the player to the game
 	const player: Player = {
@@ -243,6 +245,7 @@ function gameStart(game: Game) {
 	const { clients } = game;
 	const initialFieldCards: Card[] = [];
 	game.round = 0;
+	game.isStart = true;
 	for (let i = 0; i < 4; i++) {
 		const card: Card = randomCard(game);
 		initialFieldCards.push(card);

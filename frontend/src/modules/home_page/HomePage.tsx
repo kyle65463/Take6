@@ -53,18 +53,18 @@ function HomePage() {
 	return (
 		<div className='layout flex'>
 			<div className='flex flex-1 h-full flex-col w-full justify-center items-center'>
-				<h1 className='text-5xl'>誰是牛頭王</h1>
-				<div className='flex flex-row justify-center mt-20 mb-32 h-36'>
+				<p className="text-6xl">誰是<span className="text-9xl text-rose-500 font-bold">牛</span><span className="text-9xl text-amber-500 font-bold">頭</span><span className="text-9xl text-sky-500 font-bold">王</span></p>
+				<div className='flex flex-row justify-center mt-16 mb-32 h-36'>
 					{mode === "choose room type" && (
 						<div>
 							<div className='flex flex-row justify-center'>
-								<button onClick={onCreateRoom} className='btn btn-primary w-56 h-36 text-2xl'>
+								<button onClick={onCreateRoom} className='btn btn-primary w-56 h-32 text-2xl'>
 									Create room
 								</button>
 								<div className='w-20' />
 								<button
 									onClick={() => setMode("enter room number")}
-									className='btn btn-primary w-56 h-36 text-2xl'
+									className='btn btn-primary w-56 h-32 text-2xl'
 								>
 									Join room
 								</button>
@@ -84,7 +84,7 @@ function HomePage() {
 					)}
 					{mode === "enter room number" && user && (
 						<div>
-							<h2 className='mb-1.5'>Room number</h2>
+							<h2 className='mb-1.5 text-xl'>Room number</h2>
 							<input type='text' className='input text-xl' ref={roomNumberRef} />
 							<div className='flex justify-between mt-6'>
 								<Button onClick={() => setMode("choose room type")}>Back</Button>

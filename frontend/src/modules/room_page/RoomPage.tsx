@@ -33,7 +33,7 @@ function RoomPage() {
 				<div>
 					<div className='mb-6'>
 						<p>Room number:</p>
-						<p>{roomId}</p>
+						<p className="text-2xl">{roomId}</p>
 					</div>
 					<div className='mb-6'>
 						<p>Other players:</p>
@@ -47,7 +47,7 @@ function RoomPage() {
 					</div>
 					<div>
 						<p>You: </p>
-						<p className='mb-4 mt-2'>
+						<p className='mb-8 mt-2'>
 							<img src={player.photoURL} alt='' className='w-12 h-12 mr-2 avatar mask mask-circle' />
 							<span className='mr-2 text-lg'>{player.name}</span>
 							<span className='text-gray-400'> {player.isReady ? "ready" : "not ready"}</span>

@@ -12,6 +12,7 @@ export interface Game {
 	round: number;
 	playerReadyCount: number;
 	usedCards: number[];
+	isStart: boolean;
 
 	// The list of players and the card they played for this round
 	playedCardInfo: { playerName: string; playerId: string, card: Card }[];
